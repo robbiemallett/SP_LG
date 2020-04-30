@@ -20,7 +20,9 @@ directory = '/media/robbie/Seagate Portable Drive/im_parcels_v4/'
 
 
 def upsample_week_to_day(EASE_x_weekly):
+
     dayno = np.array(range(len(EASE_x_weekly))) * 7
+
     xnew = np.arange(0, 365, 1)
 
     f = interpolate.interp1d(dayno, EASE_x_weekly, kind='linear')

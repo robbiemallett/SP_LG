@@ -59,13 +59,13 @@ class track:
 
                 self.frame = df
 
-                self.error_flag = False
+                self.valid_data = True
             else:
                 logging.debug('Empty list upon trimming to stop date')
-                self.error_flag = True
+                self.valid_data = False
         else:
             logging.debug('Empty list upon trimming nans')
-            self.error_flag = True
+            self.valid_data = False
 
 class snowpro:
     """A combined column of ice and snow with vertical profiles

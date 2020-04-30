@@ -27,7 +27,7 @@ logging.basicConfig(level=logging.DEBUG,
 
 year            = 2016
 block_smrt      = True
-save_media_list = True
+save_media_list = False
 make_spro       = False
 single_run      = False
 
@@ -37,7 +37,7 @@ hard_stop_date = datetime.date(year=year+1, month=5, day=1)
 # Choose tracks to run
 
 # tracks_to_run = [49]
-tracks_to_run = list(range(10_600, 50_000, 2_000))
+tracks_to_run = list(range(0, 55_000, 100))
 
 #########################################################################################
 
@@ -59,9 +59,9 @@ for track_no in tracks_to_run:
 
 
 
-    if my_track == None:
+    if my_track.valid_data == False:
+        print('No relevant data')
         logging.info(f'Skipping Track Number {track_no}')
-        print('error')
         pass
     else:
 
@@ -138,7 +138,7 @@ for track_no in tracks_to_run:
 
         # Save the results
 
-        results.to_hdf(f'SP_LG_Output/track_df.hdf5', key=f'{track_no}', mode='a')
+        results.to_hdf(f'SP_LG_Output/track_df.hdf5', key=f'{str(track_no)}', mode='a')
 
         if make_spro == True:
             os.system(f'mv Snowpack_files/{track_no}_SPLG.pro SP_LG_Output/{track_no}.pro')

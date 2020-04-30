@@ -20,10 +20,10 @@ def create_smet_file(year,
 
     my_track = classes.track(track, year, stop_date)
 
-    if my_track.error_flag == True:
-        return(None)
+    if my_track.valid_data == False:
+        return(my_track)
 
-    elif my_track.error_flag == False:
+    elif my_track.valid_data == True:
 
         rean = ERA5_utils.add_reanalysis_to_track(my_track)
 
