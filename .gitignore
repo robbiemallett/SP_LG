@@ -1,0 +1,16 @@
+*.hdf5
+*.p
+venv
+*.pro
+*.haz
+Snowpack_files/**
+__pycache__/**
+SP_LG_Output/**
+*.h5
+*.sno
+*.spro
+*.nc
+*.pyc
+*.txt
+*.log
+*.smet

@@ -1,0 +1,37 @@
+[i] [2020-01-24T18:25:59] ---> Start SNOWPACK in RESEARCH mode
+[i] [2020-01-24T18:25:59] ---> Variant is 'SEAICE'
+[i] []                 snowpack compiled on Jan 20 2020 at 14:25:57
+[i] []                 Experiment : SPLG
+[i] []                 Output dir : .
+
+[i] []                 Run on meteo station 11021
+[i] []                 Reading snow cover data for station 11021
+[i] []                 Finished initializing station 11021
+[i] []                 Erased 1 *.haz file(s)
+[i] []                 Erased 1 *.sno file(s)
+[i] []                 Data in *.pro file(s) may be overwritten
+[i] []                 Erased ./11021_SPLG.ini
+[i] [2020-01-24T18:25:59] ---> Start simulation for 11021 on 2016-10-05T23:45:00+01:00
+[i] []                 End date specified by user: 2017-04-30T00:00:00+01:00
+[i] []                 Integration step length: 15.000000 min
+[i] [2016-10-21T00:00:00] ---> Station 11021 (1 slope(s)): advanced to 21.10.2016 00:00:00 station time
+[i] [2016-11-05T00:00:00] ---> Station 11021 (1 slope(s)): advanced to 05.11.2016 00:00:00 station time
+[i] [2016-11-20T00:00:00] ---> Station 11021 (1 slope(s)): advanced to 20.11.2016 00:00:00 station time
+[i] [2016-12-05T00:00:00] ---> Station 11021 (1 slope(s)): advanced to 05.12.2016 00:00:00 station time
+[i] [2016-12-20T00:00:00] ---> Station 11021 (1 slope(s)): advanced to 20.12.2016 00:00:00 station time
+[i] [2017-01-04T00:00:00] ---> Station 11021 (1 slope(s)): advanced to 04.01.2017 00:00:00 station time
+[i] [2017-01-19T00:00:00] ---> Station 11021 (1 slope(s)): advanced to 19.01.2017 00:00:00 station time
+[i] [2017-02-03T00:00:00] ---> Station 11021 (1 slope(s)): advanced to 03.02.2017 00:00:00 station time
+[i] [2017-02-18T00:00:00] ---> Station 11021 (1 slope(s)): advanced to 18.02.2017 00:00:00 station time
+[i] [2017-03-05T00:00:00] ---> Station 11021 (1 slope(s)): advanced to 05.03.2017 00:00:00 station time
+[i] [2017-03-20T00:00:00] ---> Station 11021 (1 slope(s)): advanced to 20.03.2017 00:00:00 station time
+[i] [2017-04-04T00:00:00] ---> Station 11021 (1 slope(s)): advanced to 04.04.2017 00:00:00 station time
+[i] [2017-04-19T00:00:00] ---> Station 11021 (1 slope(s)): advanced to 19.04.2017 00:00:00 station time
+[i] [2020-01-24T18:26:22] ---> Writing data to sno file(s) for track_11021 (station 11021) on 2017-04-30T00:00:00
+[i] []                 Total time to read meteo data : 0.254311 s
+[i] []                 Runtime for station 11021: 22.930013 s
+
+[i] []                 STARTED  running SLF RESEARCH Snowpack Model on Fri Jan 24 18:25:59 2020
+                       ========================================================================
+                       FINISHED running SLF RESEARCH Snowpack Model on Fri Jan 24 18:26:22 2020
+
