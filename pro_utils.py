@@ -192,7 +192,7 @@ def snowpro_from_snapshot(entry, variables):
 def pro_stripper(track_no,
                  dir='SP_LG_Output/'):
 
-    """This function """
+    """This function strips a .pro output to make a slimmed-down .spro file"""
 
     with open(f'{dir}{track_no}.pro', "r") as f:
 

@@ -7,28 +7,42 @@ import time
 from pandas.plotting import register_matplotlib_converters
 import SP_utils
 import pandas as pd
+import dill
+from dill import Pickler, Unpickler
+import shelve
+shelve.Pickler = Pickler
+shelve.Unpickler = Unpickler
 import smrt_utils
 import track_utils
 from netCDF4 import Dataset
 import logging
 import datetime
-register_matplotlib_converters()
+
+# register_matplotlib_converters()
 logging.basicConfig(level=logging.DEBUG,
                     filename='test.log')
+#########################################################################################
 
-year = 2016
-block_smrt = True
-save_media_list = False
-single_run = True
+# Config
+
+year            = 2016
+block_smrt      = True
+save_media_list = True
+make_spro       = False
+single_run      = False
 
 # Choose a date cap to stop simulations running into the melt phase
-hard_stop_date = datetime.date(year=year+1, month=5, day=1)  # May first
+hard_stop_date = datetime.date(year=year+1, month=5, day=1)
+
+# Choose tracks to run
 
 # tracks_to_run = [49]
-tracks_to_run = list(range(10_600,60_000,3_000))
+tracks_to_run = list(range(10_600, 50_000, 2_000))
 
-# Now choose a track number to analyse (initially)
-# for track_no in range(sample_track, sample_track+1):
+#########################################################################################
+
+# Model code below, do not modify
+
 for track_no in tracks_to_run:
 
     print(f'Track number: {track_no}')
@@ -46,7 +60,7 @@ for track_no in tracks_to_run:
 
 
     if my_track == None:
-        logging.info(f'Passing Track Number {track_no}')
+        logging.info(f'Skipping Track Number {track_no}')
         print('error')
         pass
     else:
@@ -73,37 +87,48 @@ for track_no in tracks_to_run:
                      track_no)
 
         while 'snowpack' in (p.name() for p in psutil.process_iter()):
-            time.sleep(0.3)
+            time.sleep(0.5)
 
         end_timer = time.time()
 
         print(f'time to run SNOWPACK: {int(end_timer-start_timer)} s')
 
-
         # Read the .pro file into a profile object
 
         pro_list = pro_utils.read(track_no)
 
-        # Prep media for SMRT to operate on
+        # Prep media for SMRT to operate on if required
 
-        mediums_list = [smrt_utils.prep_medium(snowpro) for snowpro in pro_list]
+        if save_media_list or (not block_smrt):
 
-        # Run SMRT on the list of media
+            mediums_list = [smrt_utils.prep_medium(snowpro) for snowpro in pro_list]
 
-        if block_smrt == False:
+            if save_media_list:
 
-            print('Running SMRT')
+                # Shelve the list of objects under the track_no
+                shelf_dir = f"/home/robbie/Dropbox/Modelling/SP_LG/SP_LG_Output/media_{year}"
 
-            start_timer = time.time()
+                with shelve.open(shelf_dir, 'c') as d:
 
-            smrt_res = smrt_utils.run_media_series(mediums_list,
-                                                    [19e9, 37e9])
-            end_timer = time.time()
+                    d[str(track_no)] = mediums_list
 
-            print(f'time to run SMRT: {int(end_timer - start_timer)} s')
+            # Run SMRT on the list of media
 
-        else:
-            smrt_res = None
+            if block_smrt == False:
+
+                print('Running SMRT')
+
+                start_timer = time.time()
+
+                smrt_res = smrt_utils.run_media_series(mediums_list,
+                                                        [19e9, 37e9])
+                end_timer = time.time()
+
+                print(f'time to run SMRT: {int(end_timer - start_timer)} s')
+
+            else: smrt_res = None
+
+        else: smrt_res = None
 
         # Process results
 
@@ -115,12 +140,9 @@ for track_no in tracks_to_run:
 
         results.to_hdf(f'SP_LG_Output/track_df.hdf5', key=f'{track_no}', mode='a')
 
-        # Clean the directory
-
-        os.system(f'mv Snowpack_files/{track_no}_SPLG.pro SP_LG_Output/{track_no}.pro')
-
-        pro_utils.pro_stripper(track_no)
-
+        if make_spro == True:
+            os.system(f'mv Snowpack_files/{track_no}_SPLG.pro SP_LG_Output/{track_no}.pro')
+            pro_utils.pro_stripper(track_no)
 
         if single_run == True:
             exit()
