@@ -52,9 +52,12 @@ def read(track_no):
 
         variables[variable].pop(0)
 
-    # Return the dictionary of lists of lines. Each line is a string.
 
-    return (variables)
+    series_length = len(variables['Date'])
+
+    profile_list = [snowpro_from_snapshot(x, variables) for x in range(series_length)]
+
+    return (profile_list)
 
 
 def pro_code_dict(code=False,return_all=False):

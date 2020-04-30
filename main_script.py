@@ -18,7 +18,8 @@ logging.basicConfig(level=logging.DEBUG,
 
 year = 2016
 block_smrt = True
-single_run = False
+save_media_list = False
+single_run = True
 
 # Choose a date cap to stop simulations running into the melt phase
 hard_stop_date = datetime.date(year=year+1, month=5, day=1)  # May first
@@ -42,15 +43,15 @@ for track_no in tracks_to_run:
                                             track_no=track_no,
                                             stop_date=hard_stop_date)
 
+
+
     if my_track == None:
         logging.info(f'Passing Track Number {track_no}')
         print('error')
         pass
     else:
-        # Create an initial profile for the ice parcel.
-        # This should be based on a CryoSat-2 field at some point
 
-        start_date = my_track.info['start_date']
+        print(f'Track dates: {my_track.info["start_date"]} : {my_track.info["end_date"]}')
 
         logging.debug('Creating initial .SNO file...')
 
@@ -73,7 +74,6 @@ for track_no in tracks_to_run:
 
         while 'snowpack' in (p.name() for p in psutil.process_iter()):
             time.sleep(0.3)
-            logging.debug('Waiting for SP to run...')
 
         end_timer = time.time()
 
@@ -82,18 +82,36 @@ for track_no in tracks_to_run:
 
         # Read the .pro file into a profile object
 
-        logging.debug('Reading .pro file')
+        pro_list = pro_utils.read(track_no)
 
-        # Run SMRT by telling it the track_number
+        # Prep media for SMRT to operate on
 
-        results = smrt_utils.run_track(track_no=track_no,
-                                       block_smrt=block_smrt)
+        mediums_list = [smrt_utils.prep_medium(snowpro) for snowpro in pro_list]
 
-        # Save the track and its radiometry for later analysis
+        # Run SMRT on the list of media
+
+        if block_smrt == False:
+
+            print('Running SMRT')
+
+            start_timer = time.time()
+
+            smrt_res = smrt_utils.run_media_series(mediums_list,
+                                                    [19e9, 37e9])
+            end_timer = time.time()
+
+            print(f'time to run SMRT: {int(end_timer - start_timer)} s')
+
+        else:
+            smrt_res = None
+
+        # Process results
+
+        results = smrt_utils.process_results(pro_list, smrt_res, [19e9, 37e9])
 
         results['coords'] = my_track.frame['track_coords']
 
-        print(results.shape)
+        # Save the results
 
         results.to_hdf(f'SP_LG_Output/track_df.hdf5', key=f'{track_no}', mode='a')
 

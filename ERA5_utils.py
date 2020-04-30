@@ -115,8 +115,6 @@ def add_reanalysis_to_track(my_track):
 
     df2 = pd.concat([df,weather_df],axis=1)
 
-    print(df2.head())
-
     ############################################
 
     # # Now resample to one hourly forcing
@@ -214,7 +212,7 @@ def create_smet_df(df, hourly=True):
     return (smet_frame)
 
 
-def save_smet_file(smet_frame, meta_data, smet_file_name, track_no, read_back=False):
+def save_smet_file(smet_frame, meta_data, smet_file_name, track_no):
 
     pd.set_option('display.float_format', lambda x: '%.5f' % x)
 
@@ -241,12 +239,6 @@ units_multiplier = 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     f.write(stringblock)
 
     f.close()
-    if read_back == False:
-        print('File Written Successfully')
-    else:
-        f = open(smet_file_name, "r")
-        contents = f.read()
-        print(contents)
-    # print(list(smet_frame['timestamp'])[-1])
+
     return({'start_date':smet_frame['timestamp'][0],
             'end_date':list(smet_frame['timestamp'])[-1]})

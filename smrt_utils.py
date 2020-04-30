@@ -8,62 +8,22 @@ import itertools
 import pandas as pd
 # from smrt.utils import dmrt_qms_legacy
 
-def run_track(track_no=0,
-            frequencies=[19e9,37e9],
-            block_smrt=False):
-
-    """This function should ideally iterate through a .PRO file, and for each timestep call a function that
-    calculates an SMRT result for that timestep. It should then return a list of those results to be associated with
-    the track"""
-
-    # Open a .pro file and read its contents to a dictionary
-
-    variables_dict = pro_utils.read(track_no)
-
-    # How long is this .Pro file? How many timesteps?
-
-    series_length = len(variables_dict['Date'])
-
-    profile_list = [pro_utils.snowpro_from_snapshot(x, variables_dict) for x in range(series_length)]
-
-    print('Prepping media')
-
-    mediums_list = [prep_medium(snowpro) for snowpro in profile_list]
-
-
-    if block_smrt == False:
-
-        print('Running SMRT')
-
-        smrt_res = run_media_series(mediums_list,frequencies)
-
-    else:
-
-        smrt_res = None
-
-    print('Processing Results')
-
-    df = process_smrt_results(profile_list,smrt_res,frequencies,block_smrt=block_smrt)
-
-    return(df)
-
-def process_smrt_results(snowpro_list,smrt_res,frequencies,block_smrt=False):
+def process_results(snowpro_list,smrt_res,frequencies):
 
     dict_of_lists = {
 
                     'snow_depth' : [snowpro.snowdepth for snowpro in snowpro_list],
                     'snow_density' : [snowpro.snowdensity for snowpro in snowpro_list],
                     'ice_thickness' : [snowpro.icethickness for snowpro in snowpro_list],
-                    'date' : [(snowpro.datetime).date() for snowpro in snowpro_list]
+                    'date' : [snowpro.datetime.date() for snowpro in snowpro_list]
 
                     }
 
-    if block_smrt == False:
+    if smrt_res != None:
 
         for pol in ['V', 'H']:
             for freq in frequencies:
                 dict_of_lists['Tb'+str((int(freq/1e9),pol))] = smrt_res.Tb_as_dataframe(polarization=pol,frequency=freq)['Tb']
-
 
     df = pd.DataFrame(dict_of_lists)
 
