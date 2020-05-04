@@ -4,6 +4,7 @@ from field_importer import get_field
 import mask
 from ERA5_utils import lonlat_to_xy
 from scipy import spatial
+import logging
 
 def run(end_date,
         track_no,
@@ -38,7 +39,7 @@ def get_init_vals(start_date,start_loc):
 
         if (np.isnan(w99_thick_point)) or (w99_thick_point < 0.01):
 
-            print(f'Problematic snow depth: {w99_thick_point}')
+            # logging.info(f'Problematic snow depth: {w99_thick_point}')
 
             w99_thick_point = 0.01
     else:

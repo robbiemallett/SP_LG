@@ -1,8 +1,12 @@
+*.gif
+*.png
+*.ipynb
 *.hdf5
 *.p
 venv
 *.pro
 *.haz
+gifs/**
 Snowpack_files/**
 __pycache__/**
 SP_LG_Output/**
