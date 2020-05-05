@@ -17,7 +17,7 @@ import smrt
 #             print(line)
 
 
-def read(track_no):
+def read(track_no,tmp_dir):
     '''Reads a .PRO file line by line,
     establishes which variable the line is for and adds that line to the relevant list'''
 
@@ -34,7 +34,7 @@ def read(track_no):
 
     # Open the .PRO file
 
-    with open(f'Snowpack_files/{track_no}_SPLG.pro', "r") as f:
+    with open(f'{tmp_dir}/{track_no}_SPLG.pro', "r") as f:
 
         # Iterate line by line
 

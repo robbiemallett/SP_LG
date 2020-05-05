@@ -23,6 +23,7 @@ block_smrt      = False             # Block SMRT from running - fast if you don'
 save_media_list = False             # Save a 'media' object suitable for SMRT to operate on
 make_spro       = False             # Make a 'stripped .pro' file for each track. Storage intensive
 single_run      = False             # Force a single run even when tracks_to_run is a list
+use_RAM         = True              # Saves temporary SP files to RAM rather than hard disk to increase speed
 
 # Choose a date cap to stop simulations running into the melt phase
 hard_stop_date = datetime.date(year=year+1,
@@ -42,10 +43,18 @@ log_f_name = 'my_run.log'        # Set file name of log file
 log_level = logging.WARNING      # Set level of detail of log. For long runs must be WARNING OR CRITICAL
 results_f_name = f'1151_{year}'  # Set the filename for the resulting .hdf5 file
 media_f_name = f'med_{year}'     # Set the name of the media file for SMRT (if created)
+ram_dir = '/dev/shm/SP'          # Location of ram directory - if used
+tmp_dir = '/home/robbie/Dropbox/SP_LG/Snowpack_files' # Location of temp hard disk location - if used
 
 ###################################################################################
 
 # Model code below, do not modify
+
+if use_RAM:
+    tmp_dir = ram_dir
+
+if not os.path.exists(tmp_dir):
+    os.mkdir(tmp_dir)
 
 logging.basicConfig(level=log_level,             # Configure the log
                     filename=log_f_name)
@@ -61,14 +70,15 @@ for track_no in tracks_to_run:
     # print(f'Track number: {track_no}')
     logging.info(f'Track Number: {track_no}')
 
-    cleaner_string = 'rm -r Snowpack_files/* >nul 2>&1'    # Deletes all temporary files from the last run.
+    cleaner_string = f'rm -r {tmp_dir}/* >nul 2>&1'    # Deletes all temporary files from the last run.
     os.system(cleaner_string)
 
     # Now create a .smet file of reanalysis and return a track object
 
     my_track = track_utils.create_smet_file(year=year,
                                             track_no=track_no,
-                                            stop_date=hard_stop_date)
+                                            stop_date=hard_stop_date,
+                                            tmp_dir=tmp_dir)
 
 
 
@@ -84,16 +94,19 @@ for track_no in tracks_to_run:
 
             SP_utils.create_sno_file(start_date=my_track.info['start_date'],
                                     start_loc = my_track.info['start_coords'],
-                                    track_no=track_no)
+                                    track_no=track_no,
+                                    tmp_dir=tmp_dir)
 
-            SP_utils.create_ini_file(track_no=track_no)
+            SP_utils.create_ini_file(track_no=track_no,
+                                     tmp_dir=tmp_dir)
 
             # Run SNOWPACK
 
             start_timer = time.time()           # Start a timer to measure the duration of the SNOWPACK RUN
 
             SP_utils.run(my_track.info['end_date'],
-                         track_no)
+                         tmp_dir = tmp_dir,
+                         track_no = track_no)
 
             while 'snowpack' in (p.name() for p in psutil.process_iter()):   # Holds the python script while SP runs
                 time.sleep(0.5)
@@ -103,7 +116,7 @@ for track_no in tracks_to_run:
             # print(f'time to run SNOWPACK: {int(end_timer-start_timer)} s')
             SNOWPACK_TIMER.append(int(end_timer-start_timer))
 
-            pro_list = pro_utils.read(track_no)                # Read the .pro file into a profile object
+            pro_list = pro_utils.read(track_no, tmp_dir)                # Read the .pro file into a profile object
 
             # Prep media for SMRT to operate on if required
 
@@ -147,7 +160,7 @@ for track_no in tracks_to_run:
             results.to_hdf(f'{output_dir}{results_f_name}.hdf5', key=f'{str(track_no)}', mode='a')
 
             if make_spro == True:
-                os.system(f'mv Snowpack_files/{track_no}_SPLG.pro SP_LG_Output/{track_no}.pro')
+                os.system(f'mv {tmp_dir}/{track_no}_SPLG.pro SP_LG_Output/{track_no}.pro')
                 pro_utils.pro_stripper(track_no)
 
         except Exception as e: logging.warning(f'Track no: {track_no} {e}')

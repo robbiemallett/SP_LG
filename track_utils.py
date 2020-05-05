@@ -12,9 +12,10 @@ import classes
 
 def create_smet_file(year,
                      track_no,
-                     stop_date):
+                     stop_date,
+                     tmp_dir):
 
-    smet_file_name= f'Snowpack_files/track_{track_no}.smet'
+    smet_file_name= f'{tmp_dir}/track_{track_no}.smet'
 
     track = get(year, track_no)
 

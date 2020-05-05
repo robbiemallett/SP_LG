@@ -8,16 +8,19 @@ import logging
 
 def run(end_date,
         track_no,
-        test_mode=False):
+        tmp_dir):
 
-    if test_mode == True:
-        SP_command = 'snowpack -c my_config.ini -e 2016-02-17T00:00 1> log.txt'
-    else:
-        SP_command = f'snowpack -c config_{track_no}.ini -e {end_date} 1> log.txt'
+    x = os.getcwd()
 
-    os.chdir('Snowpack_files')
+    os.chdir(f'{tmp_dir}')
+
+    SP_command = f'snowpack -c {tmp_dir}/config_{track_no}.ini -e {end_date} 1> log.txt'
+
     os.system(SP_command)
-    os.chdir('..')
+
+    os.chdir(x)
+
+
 
 def get_init_vals(start_date,start_loc):
 
@@ -50,11 +53,12 @@ def get_init_vals(start_date,start_loc):
 
 def create_sno_file(start_date,
                     start_loc,
-                    track_no):
+                    track_no,
+                    tmp_dir):
 
     SIT, snow_depth = get_init_vals(start_date,start_loc)
 
-    sno_file_name = f'Snowpack_files/{track_no}_SPLG.sno'
+    sno_file_name = f'{tmp_dir}/{track_no}_SPLG.sno'
     station_name = f'track_{track_no}'
 
     iso_startdate = start_date.isoformat()
@@ -99,12 +103,13 @@ fields        = timestamp Layer_Thick  T  Vol_Frac_I  Vol_Frac_W  Vol_Frac_V  Vo
     f.close()
 
 
-def create_ini_file(track_no):
+def create_ini_file(track_no, tmp_dir):
 
+    ini_file_name = f'{tmp_dir}/config_{track_no}.ini'
 
-    ini_file_name = f'Snowpack_files/config_{track_no}.ini'
+    x = os.getcwd()
 
-    details = f"""IMPORT_BEFORE = ../basic_config.ini
+    details = f"""IMPORT_BEFORE = {x}/basic_config.ini
 [OUTPUT]
 experiment = SPLG
 USEREFERENCELAYER = TRUE
@@ -122,7 +127,7 @@ SALINITYTRANSPORT_SOLVER  = IMPLICIT
 STATION1	=	track_{track_no}.smet
 SNOWFILE1	=	{track_no}_SPLG.sno
 [OUTPUT]
-METEOPATH	=	.
+METEOPATH	=	{tmp_dir}
 
 """
     f = open(ini_file_name, "w+", encoding='utf8')
