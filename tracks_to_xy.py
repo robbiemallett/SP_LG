@@ -31,17 +31,6 @@ def upsample_week_to_day(EASE_x_weekly):
 
     return (EASE_x_daily)
 
-
-file = Dataset('/home/robbie/test_vectors.nc')
-
-index = list(range(0, 361))
-x = file['x'][index]
-y = file['y'][index]
-
-x_slope, x_intercept, r_value, p_value, std_err = linregress(index, x)
-y_slope, y_intercept, r_value, p_value, std_err = linregress(index, y)
-
-
 def process_raw_tracks(year):
 
     year = int(year)
@@ -50,9 +39,17 @@ def process_raw_tracks(year):
 
     data = pd.read_csv(directory + file, index_col=None, header=None)
 
+    # Fill nans properly
+
     data.replace([-999.0, 999.0], np.nan, inplace=True)
 
+    print(data.shape)
+
     data_T = data.transpose()
+
+    print(data.shape)
+
+    exit()
 
     lonlat_frame = pd.DataFrame({})
     xy_frame = pd.DataFrame({})
@@ -76,6 +73,11 @@ def process_raw_tracks(year):
         dat_to_save = list(zip(EASE_x_daily, EASE_y_daily))
 
         hf.create_dataset(str(track_no), data=dat_to_save)
+
+
+        ##########################################
+
+
         # lon, lat = xy_to_lonlat(EASE_x_daily, EASE_y_daily)
         #
         # lonlat_frame[track_no] = list(zip(lon, lat))
@@ -96,7 +98,20 @@ def process_raw_tracks(year):
 
     # print('Input Year:')
     # year_input = input()
-for year in np.arange(2010,2019):
-    print(year)
-    process_raw_tracks(year)
-    print('Success!')
+
+
+# file = Dataset('/home/robbie/test_vectors.nc')
+#
+# index = list(range(0, 361))
+# x = file['x'][index]
+# y = file['y'][index]
+#
+# x_slope, x_intercept, r_value, p_value, std_err = linregress(index, x)
+# y_slope, y_intercept, r_value, p_value, std_err = linregress(index, y)
+
+process_raw_tracks(2013)
+
+# for year in np.arange(2010,2019):
+#     print(year)
+#     process_raw_tracks(year)
+#     print('Success!')
