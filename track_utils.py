@@ -21,10 +21,7 @@ def create_smet_file(year,
 
     my_track = classes.track(track, year, stop_date)
 
-    if my_track.valid_data == False:
-        return(my_track)
-
-    elif my_track.valid_data == True:
+    if my_track.valid_data:
 
         rean = ERA5_utils.add_reanalysis_to_track(my_track)
 
@@ -41,8 +38,7 @@ def create_smet_file(year,
 
         ERA5_utils.save_smet_file(smet, metadata, smet_file_name, track_no)
 
-        # return(start_end)
-        return(my_track)
+    return(my_track)
 
 def get(year,track_no):
     track_file_name = f'tracks/{year}.h5'
@@ -65,22 +61,3 @@ def lonlat_to_xy(lon, lat):
     WGS_Proj = Proj(init='epsg:4326')
     x, y = transform(WGS_Proj, EASE_Proj, lon, lat)
     return (x, y)
-
-def plot_track(array1=0,array2=0,tuplelist=0,xy=True):
-
-    if xy == True:
-        lonlist, latlist = xy_to_lonlat(array1,array2)
-    else:
-        lonlist, latlist = array1, array2
-
-    plt.figure(figsize=(10, 8))
-
-    m = Basemap(projection='npstere', boundinglat=65, lon_0=360, resolution='l')
-    m.drawcoastlines(linewidth=0.5)
-    m.scatter(180, 90, latlon=True, marker='x', s=5)
-    m.scatter(lonlist, latlist, latlon=True, marker='x', s=15)
-
-    plt.show()
-#
-# if __name__ == "__main__":
-#     create_smet_file(year=2016, track_no=11021)

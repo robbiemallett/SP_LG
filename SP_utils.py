@@ -1,10 +1,8 @@
 import os
 import numpy as np
-from field_importer import get_field
-import mask
 from ERA5_utils import lonlat_to_xy
+import xarray as xr
 from scipy import spatial
-import logging
 
 def run(end_date,
         track_no,
@@ -22,21 +20,24 @@ def run(end_date,
 
 
 
-def get_init_vals(start_date,start_loc):
-
-    # Get ease grid
+def get_init_vals(start_date,start_loc,pio_dir,w99_dir):
 
     if start_date.month == 8: # If ice parcel exists at start of simulation, then take W99 or
 
-        lon_grid, lat_grid = mask.get('lon'), mask.get('lat')
+        pio_data = get_pio_field(start_date.year,start_date.month, pio_dir=pio_dir)
+        w99_thick_field = get_w99_field(start_date.year,10,w99_dir=w99_dir)['depth']
+
+        pio_thick_field = pio_data['thickness']
+
+        lon_grid, lat_grid = np.array(pio_data['lon']), np.array(pio_data['lat'])
         x_grid, y_grid = lonlat_to_xy(lon_grid, lat_grid)
         xy_grid_points = list(zip(x_grid.ravel(), y_grid.ravel()))
         EASE_tree = spatial.KDTree(xy_grid_points)
         distance, index = EASE_tree.query(start_loc)
         nearest_index = np.unravel_index(index, (361, 361))
 
-        pio_thick_field = get_field('piomas',start_date.month,start_date.year,variable='thickness',resolution=361)['field']
-        w99_thick_field = get_field('w99',start_date.month,start_date.year,variable='depth',resolution=361)['field']
+        # pio_thick_field = get_field('piomas',start_date.month,start_date.year,variable='thickness',resolution=361)['field']
+        # w99_thick_field = get_field('w99',start_date.month,start_date.year,variable='depth',resolution=361)['field']
 
         pio_thick_point, w99_thick_point = pio_thick_field[nearest_index], w99_thick_field[nearest_index]
 
@@ -50,13 +51,41 @@ def get_init_vals(start_date,start_loc):
 
     return(pio_thick_point, w99_thick_point)
 
+def get_w99_field(year,month,w99_dir):
+
+    with xr.open_dataset(f'{w99_dir}/{year}_mW99.nc') as data:
+        ds_month = data.where(int(month) == data.month, drop=True)
+        field = np.array(ds_month['depth'])[0]
+        lon = ds_month['lon']
+        lat = ds_month['lat']
+
+    return({'depth':field,
+            'lon':lon,
+            'lat':lat})
+
+
+def get_pio_field(year, month, pio_dir):
+    with xr.open_dataset(f'{pio_dir}/{year}.nc') as data:
+        ds_month = data.where(int(month) == data.month, drop=True)
+        field = np.array(ds_month['thickness'])[0]
+        lon = ds_month['lon']
+        lat = ds_month['lat']
+
+    return ({'thickness': field,
+             'lon': lon,
+             'lat': lat})
 
 def create_sno_file(start_date,
                     start_loc,
                     track_no,
-                    tmp_dir):
+                    tmp_dir,
+                    pio_dir,
+                    w99_dir):
 
-    SIT, snow_depth = get_init_vals(start_date,start_loc)
+    SIT, snow_depth = get_init_vals(start_date,
+                                    start_loc,
+                                    pio_dir=pio_dir,
+                                    w99_dir=w99_dir)
 
     sno_file_name = f'{tmp_dir}/{track_no}_SPLG.sno'
     station_name = f'track_{track_no}'

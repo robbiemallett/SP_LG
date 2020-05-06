@@ -35,7 +35,7 @@ class track:
             track_existance = [x for x in date_list if x < hard_stop_date]
             valid_track_trimmed = valid_track[:len(track_existance)]
 
-            if track_existance != []:
+            if track_existance:
 
                 logging.info(f'Start:{track_existance[0]}. End:{track_existance[-1]}')
 

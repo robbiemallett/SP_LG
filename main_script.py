@@ -40,11 +40,13 @@ tracks_to_run = [200]
 
 output_dir = "/home/robbie/Dropbox/Modelling/SP_LG/SP_LG_Output/"
 log_f_name = 'my_run.log'        # Set file name of log file
-log_level = logging.WARNING      # Set level of detail of log. For long runs must be WARNING OR CRITICAL
+log_level = logging.DEBUG      # Set level of detail of log. For long runs must be WARNING OR CRITICAL
 results_f_name = f'1151_{year}'  # Set the filename for the resulting .hdf5 file
 media_f_name = f'med_{year}'     # Set the name of the media file for SMRT (if created)
 ram_dir = '/dev/shm/SP'          # Location of ram directory - if used
 tmp_dir = '/home/robbie/Dropbox/SP_LG/Snowpack_files' # Location of temp hard disk location - if used
+pio_dir = '/home/robbie/Dropbox/SM_Thickness/data/piomas/361x361'
+w99_dir = '/home/robbie/Dropbox/SM_Thickness/data/W99/mW99_361'
 
 ###################################################################################
 
@@ -95,7 +97,9 @@ for track_no in tracks_to_run:
             SP_utils.create_sno_file(start_date=my_track.info['start_date'],
                                     start_loc = my_track.info['start_coords'],
                                     track_no=track_no,
-                                    tmp_dir=tmp_dir)
+                                    tmp_dir=tmp_dir,
+                                    pio_dir=pio_dir,
+                                    w99_dir=w99_dir)
 
             SP_utils.create_ini_file(track_no=track_no,
                                      tmp_dir=tmp_dir)
@@ -163,7 +167,7 @@ for track_no in tracks_to_run:
                 os.system(f'mv {tmp_dir}/{track_no}_SPLG.pro SP_LG_Output/{track_no}.pro')
                 pro_utils.pro_stripper(track_no)
 
-        except Exception as e: logging.warning(f'Track no: {track_no} {e}')
+        except Exception as e:  logging.exception("message")
 
         if single_run == True: exit()
 
