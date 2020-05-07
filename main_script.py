@@ -19,7 +19,7 @@ import datetime
 # Config
 
 year            = 2016              # Choose a year
-block_smrt      = False             # Block SMRT from running - fast if you don't care about microwaves
+block_smrt      = True             # Block SMRT from running - fast if you don't care about microwaves
 save_media_list = False             # Save a 'media' object suitable for SMRT to operate on
 make_spro       = False             # Make a 'stripped .pro' file for each track. Storage intensive
 single_run      = False             # Force a single run even when tracks_to_run is a list
