@@ -47,6 +47,8 @@ ram_dir = '/dev/shm/SP'          # Location of ram directory - if used
 tmp_dir = '/home/robbie/Dropbox/SP_LG/Snowpack_files' # Location of temp hard disk location - if used
 pio_dir = '/home/robbie/Dropbox/SM_Thickness/data/piomas/361x361'
 w99_dir = '/home/robbie/Dropbox/SM_Thickness/data/W99/mW99_361'
+era_dir = '/home/robbie/Dropbox/Modelling/ERA_forcings/ERA_'
+rh_dir = '/media/robbie/Seagate Portable Drive/ERA5_3hr_reanalysis/ERA_'
 
 ###################################################################################
 
@@ -80,7 +82,9 @@ for track_no in tracks_to_run:
     my_track = track_utils.create_smet_file(year=year,
                                             track_no=track_no,
                                             stop_date=hard_stop_date,
-                                            tmp_dir=tmp_dir)
+                                            tmp_dir=tmp_dir,
+                                            era_dir=era_dir,
+                                            rh_dir=rh_dir)
 
 
 

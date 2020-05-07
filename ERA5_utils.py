@@ -40,7 +40,7 @@ def get_daylist(year):
     return(datetime_list)
 
 
-def add_reanalysis_to_track(my_track):
+def add_reanalysis_to_track(my_track,era_dir,rh_dir):
     varlist = ['u10', 'v10', 't2m', 'ptype', 'asn', 'ssrd', 'strd', 'tp']
 
     list_of_dicts = []
@@ -71,9 +71,6 @@ def add_reanalysis_to_track(my_track):
         year = list(df_m['year'])[0]
 
         # Import data
-
-        era_dir = '/home/robbie/Dropbox/Modelling/ERA_forcings/ERA_'
-        rh_dir = '/media/robbie/Seagate Portable Drive/ERA5_3hr_reanalysis/ERA_'
 
         data = Dataset(f'{era_dir}{str(year)}_{str(month).zfill(2)}.nc')
         rh_data = Dataset(f'{rh_dir}{year}_{str(month).zfill(2)}rh_.nc')

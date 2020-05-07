@@ -13,7 +13,9 @@ import classes
 def create_smet_file(year,
                      track_no,
                      stop_date,
-                     tmp_dir):
+                     tmp_dir,
+                     era_dir,
+                     rh_dir):
 
     smet_file_name= f'{tmp_dir}/track_{track_no}.smet'
 
@@ -23,7 +25,7 @@ def create_smet_file(year,
 
     if my_track.valid_data:
 
-        rean = ERA5_utils.add_reanalysis_to_track(my_track)
+        rean = ERA5_utils.add_reanalysis_to_track(my_track,era_dir=era_dir,rh_dir=rh_dir)
 
         full = ERA5_utils.add_derived_vars_to_track(rean)
 
