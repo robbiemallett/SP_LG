@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import subprocess
 from ERA5_utils import lonlat_to_xy
 import xarray as xr
 from scipy import spatial
@@ -12,9 +13,13 @@ def run(end_date,
 
     os.chdir(f'{tmp_dir}')
 
-    SP_command = f'snowpack -c {tmp_dir}/config_{track_no}.ini -e {end_date} 1> log.txt'
+    # SP_command = f'snowpack -c {tmp_dir}/config_{track_no}.ini -e {end_date} 1> log.txt'
+    # subprocess.run(SP_command,shell=True)
 
-    os.system(SP_command)
+    # Function not piping output correctly but otherwise seems fine
+    args = ['snowpack', '-c', f'{tmp_dir}/config_{track_no}.ini', '-e', f'{end_date}', '1>', 'log.txt']
+    subprocess.run(args, shell=False)
+
 
     os.chdir(x)
 
