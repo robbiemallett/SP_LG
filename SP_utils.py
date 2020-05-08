@@ -4,24 +4,38 @@ import subprocess
 from ERA5_utils import lonlat_to_xy
 import xarray as xr
 from scipy import spatial
+import time
 
 def run(end_date,
         track_no,
         tmp_dir):
 
-    x = os.getcwd()
-
-    os.chdir(f'{tmp_dir}')
-
     # SP_command = f'snowpack -c {tmp_dir}/config_{track_no}.ini -e {end_date} 1> log.txt'
     # subprocess.run(SP_command,shell=True)
 
-    # Function not piping output correctly but otherwise seems fine
+    #############################################################################################
+
+    # args = ['snowpack', '-c', f'{tmp_dir}/config_{track_no}.ini', '-e', f'{end_date}', '1>', 'log.txt']
+    # with open('SP_output.txt', 'a') as f:
+    #     sp_output = subprocess.run(args, shell=False, stdout=f, text = True)
+    # if sp_output.returncode != 0:
+    #     print(sp_output.stderr)
+
+    #########################################################
+
     args = ['snowpack', '-c', f'{tmp_dir}/config_{track_no}.ini', '-e', f'{end_date}', '1>', 'log.txt']
-    subprocess.run(args, shell=False)
 
+    start_timer = time.time()
 
-    os.chdir(x)
+    sp_output = subprocess.call(args,
+                                cwd=f'{tmp_dir}',
+                                stdout=subprocess.DEVNULL)
+
+    end_timer = time.time()
+
+    duration = int(end_timer-start_timer)
+
+    return(duration)
 
 
 

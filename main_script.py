@@ -4,6 +4,7 @@ import pro_utils
 import os
 import time
 import SP_utils
+import subprocess
 from tqdm import trange
 from dill import Pickler, Unpickler    # Necessary to store the SMRT objects for later analysiss
 import shelve
@@ -23,7 +24,7 @@ block_smrt      = True             # Block SMRT from running - fast if you don't
 save_media_list = False             # Save a 'media' object suitable for SMRT to operate on
 make_spro       = False             # Make a 'stripped .pro' file for each track. Storage intensive
 single_run      = False             # Force a single run even when tracks_to_run is a list
-use_RAM         = True              # Saves temporary SP files to RAM rather than hard disk to increase speed
+use_RAM         = False              # Saves temporary SP files to RAM rather than hard disk to increase speed
 
 # Choose a date cap to stop simulations running into the melt phase
 hard_stop_date = datetime.date(year=year+1,
@@ -74,9 +75,6 @@ for track_no in tracks_to_run:
     # print(f'Track number: {track_no}')
     logging.info(f'Track Number: {track_no}')
 
-    cleaner_string = f'rm -r {tmp_dir}/* >nul 2>&1'    # Deletes all temporary files from the last run.
-    os.system(cleaner_string)
-
     # Now create a .smet file of reanalysis and return a track object
 
     my_track = track_utils.create_smet_file(year=year,
@@ -108,25 +106,21 @@ for track_no in tracks_to_run:
             SP_utils.create_ini_file(track_no=track_no,
                                      tmp_dir=tmp_dir)
 
+            ###################################################################################
+
             # Run SNOWPACK
 
-            start_timer = time.time()           # Start a timer to measure the duration of the SNOWPACK RUN
-
-            SP_utils.run(my_track.info['end_date'],
+            duration = SP_utils.run(my_track.info['end_date'],
                          tmp_dir = tmp_dir,
                          track_no = track_no)
 
-            while 'snowpack' in (p.name() for p in psutil.process_iter()):   # Holds the python script while SP runs
-                time.sleep(0.5)
-
-            end_timer = time.time()
-
-            # print(f'time to run SNOWPACK: {int(end_timer-start_timer)} s')
-            SNOWPACK_TIMER.append(int(end_timer-start_timer))
+            SNOWPACK_TIMER.append(duration)
 
             pro_list = pro_utils.read(track_no, tmp_dir)                # Read the .pro file into a profile object
 
             # Prep media for SMRT to operate on if required
+
+            ##########################################################################################
 
             if save_media_list or (not block_smrt):
 
@@ -173,7 +167,20 @@ for track_no in tracks_to_run:
 
         except Exception as e:  logging.exception("message")
 
-        if single_run == True: exit()
+
+        deletion_list = [f'{track_no}_SPLG.haz',
+                         f'{track_no}_SPLG.ini',
+                         f'{track_no}_SPLG.sno',
+                         f'{track_no}_SPLG.pro',
+                         f'config_{track_no}.ini',
+                         f'track_{track_no}.smet']
+
+        for file in deletion_list:
+            cleaner_command = ['rm', f'{file}']
+            subprocess.call(cleaner_command,
+                            cwd=f'{tmp_dir}')
+
+        if single_run: exit()
 
 logging.critical(f'End time: {str(datetime.datetime.now())}')
 print(f'End time: {str(datetime.datetime.now())}')
