@@ -6,7 +6,7 @@ from netCDF4 import Dataset
 import dateutil.parser
 import pickle
 import datetime
-
+import xarray as xr
 
 def lonlat_to_xy(lon, lat):
     EASE_Proj = Proj(init='epsg:3408')
@@ -72,55 +72,48 @@ def add_reanalysis_to_track(my_track,era_dir,rh_dir):
 
         # Import data
 
-        data = Dataset(f'{era_dir}{str(year)}_{str(month).zfill(2)}.nc')
-        rh_data = Dataset(f'{rh_dir}{year}_{str(month).zfill(2)}rh_.nc')
+        with xr.open_dataset(f'{era_dir}{str(year)}_{str(month).zfill(2)}.nc') as data, \
+                xr.open_dataset(f'{rh_dir}{year}_{str(month).zfill(2)}rh_.nc') as rh_data:
 
-        for index, row in df_m.iterrows():
+            # data = Dataset(f'{era_dir}{str(year)}_{str(month).zfill(2)}.nc')
+            # rh_data = Dataset(f'{rh_dir}{year}_{str(month).zfill(2)}rh_.nc')
 
-            my_dt = index
+            for index, row in df_m.iterrows():
 
-            day_of_month = my_dt.day
-            hour_of_day = my_dt.hour
+                my_dt = index
 
-            i_index = row['ERA_i_ind']
-            j_index = row['ERA_j_ind']
+                day_of_month = my_dt.day
+                hour_of_day = my_dt.hour
 
-            # Get the timestamp of the variable
+                i_index = row['ERA_i_ind']
+                j_index = row['ERA_j_ind']
 
-            dat_dic = {}
+                # Get the timestamp of the variable
 
-            # Load the month's data
+                dat_dic = {}
 
-            time_index = int((8 * (day_of_month - 1)) + hour_of_day / 3)
+                # Load the month's data
 
-            for var in varlist:
-                try:
-                    dat_dic[var] = data[var][time_index,i_index,j_index]
-                except:
-                    print(f'ERROR:{my_dt}')
+                time_index = int((8 * (day_of_month - 1)) + hour_of_day / 3)
 
-            dat_dic['rh'] = rh_data['r'][time_index,i_index,j_index]
+                for var in varlist:
+                    try:
+                        dat_dic[var] = float(data[var][time_index,i_index,j_index])
+                    except:
+                        print(f'ERROR:{my_dt}')
 
-            dat_dic['dt'] = my_dt
+                dat_dic['rh'] = float(rh_data['r'][time_index,i_index,j_index])
 
-            list_of_dicts.append(dat_dic)
+                dat_dic['dt'] = my_dt
 
+                list_of_dicts.append(dat_dic)
 
 
     weather_df = pd.DataFrame(list_of_dicts)
+
     weather_df.set_index(['dt'], inplace=True, drop=True)
 
     df2 = pd.concat([df,weather_df],axis=1)
-
-    ############################################
-
-    # # Now resample to one hourly forcing
-    #
-    # df2 = df2.resample('H').backfill()
-    #
-    # df2['tp'] = df2['tp']/3
-
-    ###########################################
 
     df2['ISO_time'] = [x.isoformat() for x in df2.index]
 
@@ -138,10 +131,6 @@ def add_derived_vars_to_track(df):
     for i in range(len(df['tp'])):
         cum_precip += df['tp'][i]
         cum_precip_list.append(cum_precip)
-
-        # model_date = df['timestamp'][i]
-        #
-        # ISO_timeseries_list.append(model_date.isoformat())
 
         wind_speed_list.append(sqrt((df['v10'][i] ** 2) + (df['u10'][i] ** 2)))
 
@@ -178,33 +167,6 @@ def create_smet_df(df, hourly=True):
                                'TS1': null,
                                'TS2': null,
                                'TS3': null})
-
-    # if hourly == True:
-    #
-    #     hourly_records = []
-    #
-    #     for rownum in range(len(smet_frame)):
-    #         row0 = smet_frame.iloc[rownum]
-    #         three_hr_psum = row0['PSUM'].copy()
-    #
-    #         print(type(row0))
-    #
-    #         row0.set_value('PSUM', three_hr_psum / 3)
-    #         hourly_records.append(row0)
-    #
-    #         row1 = row0.copy()
-    #         time1 = reverser(smet_frame.iloc[rownum]['timestamp']) + timedelta(hours=1)
-    #         row1.set_value('timestamp', time1.isoformat())
-    #         row1.set_value('PSUM', three_hr_psum / 3)
-    #         hourly_records.append(row1)
-    #
-    #         row2 = row0.copy()
-    #         time2 = reverser(smet_frame.iloc[rownum]['timestamp']) + timedelta(hours=2)
-    #         row2.set_value('timestamp', time2.isoformat())
-    #         row2.set_value('PSUM', three_hr_psum / 3)
-    #         hourly_records.append(row2)
-    #
-    #     smet_frame = pd.DataFrame.from_records(hourly_records)
 
     return (smet_frame)
 
