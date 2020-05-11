@@ -86,7 +86,7 @@ def get_w99_field(year,month,w99_dir):
 
 
 def get_pio_field(year, month, pio_dir):
-    with xr.open_dataset(f'{pio_dir}/{year}.nc') as data:
+    with xr.open_dataset(f'{pio_dir}/pio_{year}.nc') as data:
         ds_month = data.where(int(month) == data.month, drop=True)
         field = np.array(ds_month['thickness'])[0]
         lon = ds_month['lon']

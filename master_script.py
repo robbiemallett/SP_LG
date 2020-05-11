@@ -46,10 +46,16 @@ def multi_track_run(tracks_to_run,
 
         ######################################################
 
+        aux_data_dir = '/home/robbie/Dropbox/Data/for_grace/'
+
         x = SP_LG(track_no,
+                  ram_dir='/dev/shm/SP',  # Location of ram directory
+                  tmp_dir='/home/robbie/Dropbox/SP_LG/Snowpack_files',  # Location of temp hard disk location
                   results_f_name=f'Core_{core}_',
                   save_media_list=True,
                   media_f_name=f'Core_{core}_med',
+                  aux_dir=aux_data_dir,
+                  output_dir="/home/robbie/Dropbox/SP_LG/SP_LG_Output/",
                   use_RAM=True)
 
         ######################################################

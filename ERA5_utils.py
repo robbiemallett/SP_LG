@@ -72,8 +72,8 @@ def add_reanalysis_to_track(my_track,era_dir,rh_dir):
 
         # Import data
 
-        with xr.open_dataset(f'{era_dir}{str(year)}_{str(month).zfill(2)}.nc') as data, \
-                xr.open_dataset(f'{rh_dir}{year}_{str(month).zfill(2)}rh_.nc') as rh_data:
+        with xr.open_dataset(f'{era_dir}/ERA_{str(year)}_{str(month).zfill(2)}.nc') as data, \
+                xr.open_dataset(f'{rh_dir}/ERA_{year}_{str(month).zfill(2)}rh_.nc') as rh_data:
 
             # data = Dataset(f'{era_dir}{str(year)}_{str(month).zfill(2)}.nc')
             # rh_data = Dataset(f'{rh_dir}{year}_{str(month).zfill(2)}rh_.nc')

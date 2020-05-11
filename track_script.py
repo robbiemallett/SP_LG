@@ -17,14 +17,6 @@ import datetime
 
 #########################################################################################
 
-# Choose tracks to run, must be an iterator
-
-# tracks_to_run = [1151]
-tracks_to_run = [200]
-# tracks_to_run = trange(1, 55_000, 25)
-
-
-# Config
 def SP_LG(track_no,
             year            = 2016,              # Choose a year
             block_smrt      = True,             # Block SMRT from running - fast if you don't care about microwaves
@@ -37,10 +29,7 @@ def SP_LG(track_no,
             media_f_name = f'med',     # Set the name of the media file for SMRT (if created)
             ram_dir = '/dev/shm/SP',          # Location of ram directory - if used
             tmp_dir = '/home/robbie/Dropbox/SP_LG/Snowpack_files', # Location of temp hard disk location - if used
-            pio_dir = '/home/robbie/Dropbox/SM_Thickness/data/piomas/361x361',
-            w99_dir = '/home/robbie/Dropbox/SM_Thickness/data/W99/mW99_361',
-            era_dir = '/home/robbie/Dropbox/Modelling/ERA_forcings/ERA_',
-            rh_dir = '/media/robbie/Seagate Portable Drive/ERA5_3hr_reanalysis/ERA_'):
+            aux_dir = '/home/robbie/Dropbox/Data/for_grace/'):
 
 ###################################################################################
 
@@ -65,8 +54,8 @@ def SP_LG(track_no,
                                             track_no=track_no,
                                             stop_date=hard_stop_date,
                                             tmp_dir=tmp_dir,
-                                            era_dir=era_dir,
-                                            rh_dir=rh_dir)
+                                            era_dir=aux_dir,
+                                            rh_dir=aux_dir)
 
 
 
@@ -85,8 +74,8 @@ def SP_LG(track_no,
                                     start_loc = my_track.info['start_coords'],
                                     track_no=track_no,
                                     tmp_dir=tmp_dir,
-                                    pio_dir=pio_dir,
-                                    w99_dir=w99_dir)
+                                    pio_dir=aux_dir,
+                                    w99_dir=aux_dir)
 
             SP_utils.create_ini_file(track_no=track_no,
                                      tmp_dir=tmp_dir)
