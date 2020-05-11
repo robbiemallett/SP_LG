@@ -19,7 +19,7 @@ def create_smet_file(year,
 
     smet_file_name= f'{tmp_dir}/track_{track_no}.smet'
 
-    track = get(year, track_no)
+    track = get(year, track_no,era_dir)
 
     my_track = classes.track(track, year, stop_date)
 
@@ -42,8 +42,9 @@ def create_smet_file(year,
 
     return(my_track)
 
-def get(year,track_no):
-    track_file_name = f'tracks/{year}.h5'
+def get(year, track_no, track_dir):
+
+    track_file_name = f'{track_dir}/{year}.h5'
 
     f = h5py.File(track_file_name, 'r')
 

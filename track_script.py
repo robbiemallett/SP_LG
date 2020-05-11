@@ -149,7 +149,7 @@ def SP_LG(track_no,
                              f'config_{track_no}.ini',
                              f'track_{track_no}.smet']
 
-            with open('log.txt','ab') as log:
+            with open('SP_LG_Output/log.txt','ab') as log:
                 for file in deletion_list:
                     cleaner_command = ['rm', f'{file}']
                     subprocess.call(cleaner_command,
