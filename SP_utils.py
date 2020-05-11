@@ -23,13 +23,15 @@ def run(end_date,
 
     #########################################################
 
-    args = ['snowpack', '-c', f'{tmp_dir}/config_{track_no}.ini', '-e', f'{end_date}', '1>', 'log.txt']
+    args = ['snowpack', '-c', f'{tmp_dir}/config_{track_no}.ini', '-e', f'{end_date}']
 
     start_timer = time.time()
 
-    sp_output = subprocess.call(args,
-                                cwd=f'{tmp_dir}',
-                                stdout=subprocess.DEVNULL)
+    with open('log.txt', 'ab') as log:
+        sp_output = subprocess.call(args,
+                                    cwd=f'{tmp_dir}',
+                                    stdout=subprocess.DEVNULL,
+                                    stderr=log)
 
     end_timer = time.time()
 

@@ -149,7 +149,8 @@ def SP_LG(track_no,
                 pro_utils.pro_stripper(track_no)
 
         except Exception as e:
-            logging.exception("message")
+            print(e)
+            logging.exception(f'{track_no}')
             duration = np.nan
 
         if delete:
@@ -160,9 +161,11 @@ def SP_LG(track_no,
                              f'config_{track_no}.ini',
                              f'track_{track_no}.smet']
 
-            for file in deletion_list:
-                cleaner_command = ['rm', f'{file}']
-                subprocess.call(cleaner_command,
-                                cwd=f'{tmp_dir}')
+            with open('log.txt','ab') as log:
+                for file in deletion_list:
+                    cleaner_command = ['rm', f'{file}']
+                    subprocess.call(cleaner_command,
+                                    cwd=f'{tmp_dir}',
+                                    stderr=log)
 
     return(duration)

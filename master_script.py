@@ -1,11 +1,12 @@
 import numpy as np
-import psutil
+import pandas as pd
 import multiprocessing
 import pro_utils
 import os
 import time
 import SP_utils
 import subprocess
+import h5py
 from tqdm import trange
 from dill import Pickler, Unpickler    # Necessary to store the SMRT objects for later analysiss
 import shelve
@@ -19,13 +20,8 @@ from track_script import SP_LG
 import psutil
 import time
 
-# Choose tracks to run, must be an iterator
 
-# tracks_to_run = [1151]
-tracks_to_run = [200]
-# tracks_to_run = trange(1, 55_000, 3000)
-
-def dangerous_temp(cores):
+def dangerous_temp():
     temps =  psutil.sensors_temperatures()['coretemp']
     too_hot = False
     for i in temps:
@@ -34,29 +30,19 @@ def dangerous_temp(cores):
 
     return(too_hot)
 
-
+######################################################################
 
 def multi_track_run(tracks_to_run,
-                    log_f_name=f'SP_LG_Output/core',  # Set file name of log file
-                    log_level = logging.DEBUG,
                     core=0,
                     temp_control=True):
-
-    log_f_name = log_f_name + f'_{core}.log'
-
-    logging.basicConfig(level=log_level,
-                        filename=log_f_name)
-
-    logging.critical(f'Start time: {str(datetime.datetime.now())}')
-    print(f'Start time: {str(datetime.datetime.now())}')
 
     SNOWPACK_TIMER = []  # a list recording the duration of every SNOWPACK run.
 
     for track_no in tracks_to_run:
 
         if temp_control:                    # Hold iteration if cores too hot
-            while dangerous_temp(cores):
-                time.sleep(0.5)
+            while dangerous_temp():
+                time.sleep(3)
 
         ######################################################
 
@@ -71,22 +57,34 @@ def multi_track_run(tracks_to_run,
         if not np.isnan(x):
             SNOWPACK_TIMER.append(x)
 
-    logging.critical(f'End time: {str(datetime.datetime.now())}')
-    print(f'Core {core} End time: {str(datetime.datetime.now())}')
-    print(f'Core {core} Mean time = {np.nanmean(SNOWPACK_TIMER)}')
-    print(f'Core {core} Successful runs = {len(SNOWPACK_TIMER)}/{len(list(tracks_to_run))}')
+    mean_time = np.nanmean(SNOWPACK_TIMER)
+    attempted_runs = len(list(tracks_to_run))
+    achieved_runs = len(SNOWPACK_TIMER)
 
+    return_dict = {'mean_time' : mean_time,
+                    'attempted_runs' : attempted_runs,
+                    'achieved_runs' : achieved_runs}
 
+    logging.critical(f'Core {core}: {return_dict}')
 
-# multi_track_run(tracks_to_run)
+    return(return_dict)
 
-cores = 5
+############################################################
+
+logging.basicConfig(level=logging.WARNING,
+                    filename=f'SP_LG_Output/log.txt')
+
+logging.critical(f'Start time: {str(datetime.datetime.now())}')
+
+cores = 1
 processes = []
+
+
 for core in range(cores):
 
     p = multiprocessing.Process(target = multi_track_run,
-                                # args = [[200]],
-                                args=(trange(core, 10000, cores),),
+                                args = [[200]],
+                                # args= (trange(core, 55000, 15),),
                                 kwargs={'core':core})
 
     p.start()
@@ -96,3 +94,18 @@ for core in range(cores):
 for p in processes:
     p.join()
 
+logging.critical(f'End time: {str(datetime.datetime.now())}')
+
+
+#
+#
+# year = 2016
+# for core in trange(cores):
+#
+#     with h5py.File(f'SP_LG_Output/Core_{core}_{year}.hdf5', 'r') as f:
+#
+#         track_keys = list(f.keys())
+#
+#     for key in track_keys:
+#         data = pd.read_hdf(f'SP_LG_Output/Core_{core}_{year}.hdf5', key=key, mode='r')
+#         data.to_hdf(f'SP_LG_Output/Cores_combined_{year}.hdf5', key=key, mode='a')
