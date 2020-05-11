@@ -149,7 +149,6 @@ def SP_LG(track_no,
                 pro_utils.pro_stripper(track_no)
 
         except Exception as e:
-            print(e)
             logging.exception(f'{track_no}')
             duration = np.nan
 
