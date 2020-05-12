@@ -31,9 +31,9 @@ def run(end_date,
     # with open(f'log.txt', 'ab') as log:
     sp_output = subprocess.call(args,
                                     cwd=f'{tmp_dir}',
-                                    stdout=subprocess.DEVNULL,
+                                    stdout=subprocess.DEVNULL)
                                     # stderr=log,
-                                    stderr=subprocess.DEVNULL)
+
 
     end_timer = time.time()
 
