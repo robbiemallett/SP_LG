@@ -16,7 +16,7 @@ def lonlat_to_xy(lon, lat):
 
 def get_grid():
 
-    ERA5_data = Dataset('ERA5_sample.nc')
+    ERA5_data = Dataset('utility_files/ERA5_sample.nc')
 
     ERA5_lon_grid = np.array([np.array(ERA5_data['longitude']), ] * 121)
 
