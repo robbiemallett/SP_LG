@@ -25,6 +25,7 @@ import time
 
 # CONFIGURATION
 grace_run = False
+cores = 1
 log_dir = 'SP_LG_Output/log.txt'
 ram_dir = '/dev/shm/SP'
 use_RAM = True
@@ -101,9 +102,11 @@ logging.basicConfig(level=log_level,
 
 logging.critical(f'Start time: {str(datetime.datetime.now())}')
 
-cores = 1
-processes = []
 
+
+
+
+processes = []
 
 for core in range(cores):
 
