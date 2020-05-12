@@ -24,7 +24,7 @@ import time
 #####################################################################
 
 # CONFIGURATION
-grace_run = True
+grace_run = False
 log_dir = 'SP_LG_Output/log.txt'
 ram_dir = '/dev/shm/SP'
 use_RAM = True
@@ -33,8 +33,8 @@ log_level=logging.WARNING
 
 if grace_run:
     tmp_dir = '/home/ucfarm0/Scratch'
-    aux_data_dir = '/home/ucfarm0/SP_LG/aux_data'
-    output_dir = '/home/ucfarm0/Scratch'
+    aux_data_dir = '/home/ucfarm0/SP_LG/aux_data/'
+    output_dir = '/home/ucfarm0/Scratch/'
 else:
     tmp_dir = '/home/robbie/Dropbox/SP_LG/Snowpack_files'
     aux_data_dir = '/home/robbie/Dropbox/Data/for_grace/'
