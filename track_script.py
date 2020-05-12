@@ -74,8 +74,7 @@ def SP_LG(track_no,
                                     start_loc = my_track.info['start_coords'],
                                     track_no=track_no,
                                     tmp_dir=tmp_dir,
-                                    pio_dir=aux_dir,
-                                    w99_dir=aux_dir)
+                                    aux_dir=aux_dir)
 
             SP_utils.create_ini_file(track_no=track_no,
                                      tmp_dir=tmp_dir,
