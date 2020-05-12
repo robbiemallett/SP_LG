@@ -157,7 +157,7 @@ def create_ini_file(track_no, tmp_dir, aux_dir):
 
     ini_file_name = f'{tmp_dir}/config_{track_no}.ini'
 
-    details = f"""IMPORT_BEFORE = {aux_dir}/basic_config.ini
+    details = f"""IMPORT_BEFORE = {aux_dir}basic_config.ini
 [OUTPUT]
 experiment = SPLG
 USEREFERENCELAYER = TRUE
