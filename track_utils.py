@@ -14,18 +14,17 @@ def create_smet_file(year,
                      track_no,
                      stop_date,
                      tmp_dir,
-                     era_dir,
-                     rh_dir):
+                     aux_dir):
 
     smet_file_name= f'{tmp_dir}/track_{track_no}.smet'
 
-    track = get(year, track_no,era_dir)
+    track = get(year, track_no,aux_dir)
 
-    my_track = classes.track(track, year, stop_date)
+    my_track = classes.track(track, year, stop_date, aux_dir)
 
     if my_track.valid_data:
 
-        rean = ERA5_utils.add_reanalysis_to_track(my_track,era_dir=era_dir,rh_dir=rh_dir)
+        rean = ERA5_utils.add_reanalysis_to_track(my_track,aux_dir=aux_dir)
 
         full = ERA5_utils.add_derived_vars_to_track(rean)
 

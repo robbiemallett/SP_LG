@@ -55,8 +55,7 @@ def SP_LG(track_no,
                                             track_no=track_no,
                                             stop_date=hard_stop_date,
                                             tmp_dir=tmp_dir,
-                                            era_dir=aux_dir,
-                                            rh_dir=aux_dir)
+                                            aux_dir=aux_dir)
 
 
 

@@ -14,9 +14,9 @@ def lonlat_to_xy(lon, lat):
     x, y = transform(WGS_Proj, EASE_Proj, lon, lat)
     return (x, y)
 
-def get_grid():
+def get_grid(aux_dir):
 
-    ERA5_data = Dataset('utility_files/ERA5_sample.nc')
+    ERA5_data = Dataset(f'{aux_dir}ERA5_sample.nc')
 
     ERA5_lon_grid = np.array([np.array(ERA5_data['longitude']), ] * 121)
 
@@ -40,7 +40,7 @@ def get_daylist(year):
     return(datetime_list)
 
 
-def add_reanalysis_to_track(my_track,era_dir,rh_dir):
+def add_reanalysis_to_track(my_track,aux_dir):
     varlist = ['u10', 'v10', 't2m', 'ptype', 'asn', 'ssrd', 'strd', 'tp']
 
     list_of_dicts = []
@@ -72,8 +72,8 @@ def add_reanalysis_to_track(my_track,era_dir,rh_dir):
 
         # Import data
 
-        with xr.open_dataset(f'{era_dir}/ERA_{str(year)}_{str(month).zfill(2)}.nc') as data, \
-                xr.open_dataset(f'{rh_dir}/ERA_{year}_{str(month).zfill(2)}rh_.nc') as rh_data:
+        with xr.open_dataset(f'{aux_dir}/ERA_{str(year)}_{str(month).zfill(2)}.nc') as data, \
+                xr.open_dataset(f'{aux_dir}/ERA_{year}_{str(month).zfill(2)}rh_.nc') as rh_data:
 
             # data = Dataset(f'{era_dir}{str(year)}_{str(month).zfill(2)}.nc')
             # rh_data = Dataset(f'{rh_dir}{year}_{str(month).zfill(2)}rh_.nc')

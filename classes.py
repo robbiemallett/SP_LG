@@ -8,7 +8,7 @@ import datetime
 class track:
     """A virtual ice parcel track and associated reanalysis"""
 
-    def __init__(self, input_track, year, hard_stop_date):
+    def __init__(self, input_track, year, hard_stop_date, aux_dir):
 
         # Trim leading and trailing nans from the track (as parcel enters and leaves the scheme)
 
@@ -46,7 +46,7 @@ class track:
                                       'start_coords' : valid_track_trimmed[0],
                                       'end_coords': valid_track_trimmed[-1]}
 
-                ERA5_grid = get_grid()
+                ERA5_grid = get_grid(aux_dir=aux_dir)
 
                 distance, index = spatial.KDTree(ERA5_grid).query(valid_track_trimmed)
 
