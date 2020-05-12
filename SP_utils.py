@@ -43,12 +43,12 @@ def run(end_date,
 
 
 
-def get_init_vals(start_date,start_loc,pio_dir,w99_dir):
+def get_init_vals(start_date,start_loc,aux_dir):
 
     if start_date.month == 8: # If ice parcel exists at start of simulation, then take W99 or
 
-        pio_data = get_pio_field(start_date.year,start_date.month, pio_dir=pio_dir)
-        w99_thick_field = get_w99_field(start_date.year,10,w99_dir=w99_dir)['depth']
+        pio_data = get_pio_field(start_date.year,start_date.month, pio_dir=aux_dir)
+        w99_thick_field = get_w99_field(start_date.year,10,w99_dir=aux_dir)['depth']
 
         pio_thick_field = pio_data['thickness']
 
@@ -102,13 +102,11 @@ def create_sno_file(start_date,
                     start_loc,
                     track_no,
                     tmp_dir,
-                    pio_dir,
-                    w99_dir):
+                    aux_dir):
 
     SIT, snow_depth = get_init_vals(start_date,
                                     start_loc,
-                                    pio_dir=pio_dir,
-                                    w99_dir=w99_dir)
+                                    aux_dir=aux_dir)
 
     sno_file_name = f'{tmp_dir}/{track_no}_SPLG.sno'
     station_name = f'track_{track_no}'
@@ -155,13 +153,11 @@ fields        = timestamp Layer_Thick  T  Vol_Frac_I  Vol_Frac_W  Vol_Frac_V  Vo
     f.close()
 
 
-def create_ini_file(track_no, tmp_dir):
+def create_ini_file(track_no, tmp_dir, aux_dir):
 
     ini_file_name = f'{tmp_dir}/config_{track_no}.ini'
 
-    x = os.getcwd()
-
-    details = f"""IMPORT_BEFORE = {x}/basic_config.ini
+    details = f"""IMPORT_BEFORE = {aux_dir}/basic_config.ini
 [OUTPUT]
 experiment = SPLG
 USEREFERENCELAYER = TRUE

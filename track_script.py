@@ -78,7 +78,8 @@ def SP_LG(track_no,
                                     w99_dir=aux_dir)
 
             SP_utils.create_ini_file(track_no=track_no,
-                                     tmp_dir=tmp_dir)
+                                     tmp_dir=tmp_dir,
+                                     aux_dir=aux_dir)
 
             ###################################################################################
 
