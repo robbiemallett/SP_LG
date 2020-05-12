@@ -36,7 +36,7 @@ log_level=logging.WARNING
 if grace_run:
     tmp_dir = '/home/ucfarm0/Scratch'
     aux_data_dir = '/home/ucfarm0/SP_LG/aux_data/'
-    output_dir = '/home/ucfarm0/Scratch/'
+    output_dir = '/home/ucfarm0/Scratch/output/'
     use_RAM = False
 
 else:

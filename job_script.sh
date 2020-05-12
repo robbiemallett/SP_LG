@@ -16,7 +16,7 @@
 #$ -pe smp 2
 
 # Set the working directory to somewhere in your scratch space.
-#$ -wd /home/ucfarm0/Scratch/output
+#$ -wd /home/ucfarm0/Scratch
 
 # 8. Run the application.
 python3 /home/ucfarm0/SP_LG/SP_LG/master_script.py
