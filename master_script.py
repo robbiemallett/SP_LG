@@ -20,9 +20,13 @@ import datetime
 from track_script import SP_LG
 import psutil
 import time
+import os
 
 
 #####################################################################
+
+x = os.getcwd()
+print(x)
 
 # CONFIGURATION
 grace_run = False
@@ -34,7 +38,8 @@ save_media_list = True
 log_level=logging.WARNING
 
 if grace_run:
-    tmp_dir = '/scratch/scratch/ucfarm0'
+    # tmp_dir = '/scratch/scratch/ucfarm0'
+    tmp_dir = x
     aux_data_dir = '/home/ucfarm0/SP_LG/aux_data/'
     output_dir = '/home/ucfarm0/Scratch/output/'
     use_RAM = False
@@ -68,6 +73,7 @@ def multi_track_run(tracks_to_run,
                   log_f_name = log_f_name,
                   media_f_name=f'Core_{core}_med',
                   aux_dir=aux_data_dir,
+                  delete=False,
                   output_dir=output_dir,
                   use_RAM=use_RAM)
 
@@ -104,7 +110,7 @@ processes = []
 for core in range(cores):
 
     p = multiprocessing.Process(target = multi_track_run,
-                                args= (trange(core+200, 205, cores),),
+                                args= (trange(core+200, 202, cores),),
                                 kwargs={'core':core})
 
     p.start()
