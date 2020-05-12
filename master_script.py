@@ -1,19 +1,20 @@
 import numpy as np
-import pandas as pd
+# import pandas as pd
 import multiprocessing
-import pro_utils
-import os
-import time
-import SP_utils
-import subprocess
-import h5py
+# import pro_utils
+# import os
+from SP_utils import dangerous_temp
+# import time
+# import SP_utils
+# import subprocess
+# import h5py
 from tqdm import trange
-from dill import Pickler, Unpickler    # Necessary to store the SMRT objects for later analysiss
+from dill import Pickler, Unpickler
 import shelve
 shelve.Pickler = Pickler
 shelve.Unpickler = Unpickler
-import smrt_utils
-import track_utils
+# import smrt_utils
+# import track_utils
 import logging
 import datetime
 from track_script import SP_LG
@@ -26,7 +27,7 @@ import time
 # CONFIGURATION
 grace_run = False
 cores = 1
-log_dir = 'SP_LG_Output/log.txt'
+log_f_name = 'log.txt'
 ram_dir = '/dev/shm/SP'
 use_RAM = True
 save_media_list = True
@@ -40,17 +41,6 @@ else:
     tmp_dir = '/home/robbie/Dropbox/SP_LG/Snowpack_files'
     aux_data_dir = '/home/robbie/Dropbox/Data/for_grace/'
     output_dir = "/home/robbie/Dropbox/SP_LG/SP_LG_Output/"
-
-#####################################################################
-
-def dangerous_temp():
-    temps =  psutil.sensors_temperatures()['coretemp']
-    too_hot = False
-    for i in temps:
-        if i[1] > 70:
-            too_hot = True
-
-    return(too_hot)
 
 ######################################################################
 
@@ -73,6 +63,7 @@ def multi_track_run(tracks_to_run,
                   tmp_dir=tmp_dir,  # Location of temp hard disk location
                   results_f_name=f'Core_{core}_',
                   save_media_list=save_media_list,
+                  log_f_name = log_f_name,
                   media_f_name=f'Core_{core}_med',
                   aux_dir=aux_data_dir,
                   output_dir=output_dir,
@@ -98,7 +89,7 @@ def multi_track_run(tracks_to_run,
 ############################################################
 
 logging.basicConfig(level=log_level,
-                    filename=log_dir)
+                    filename=f'{output_dir}{log_f_name}')
 
 logging.critical(f'Start time: {str(datetime.datetime.now())}')
 
@@ -111,8 +102,7 @@ processes = []
 for core in range(cores):
 
     p = multiprocessing.Process(target = multi_track_run,
-                                args = [[200]],
-                                # args= (trange(core, 55000, 15),),
+                                args= (trange(core+200, 205, cores),),
                                 kwargs={'core':core})
 
     p.start()
