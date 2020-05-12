@@ -3,6 +3,7 @@ import numpy as np
 import subprocess
 from ERA5_utils import lonlat_to_xy
 import xarray as xr
+import psutil
 from scipy import spatial
 import time
 
@@ -27,11 +28,12 @@ def run(end_date,
 
     start_timer = time.time()
 
-    with open('log.txt', 'ab') as log:
-        sp_output = subprocess.call(args,
+    # with open(f'log.txt', 'ab') as log:
+    sp_output = subprocess.call(args,
                                     cwd=f'{tmp_dir}',
                                     stdout=subprocess.DEVNULL,
-                                    stderr=log)
+                                    # stderr=log,
+                                    stderr=subprocess.DEVNULL)
 
     end_timer = time.time()
 
@@ -184,3 +186,12 @@ METEOPATH	=	{tmp_dir}
     f.write(details)
 
     f.close()
+
+def dangerous_temp():
+    temps =  psutil.sensors_temperatures()['coretemp']
+    too_hot = False
+    for i in temps:
+        if i[1] > 70:
+            too_hot = True
+
+    return(too_hot)

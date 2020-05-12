@@ -24,6 +24,7 @@ def SP_LG(track_no,
             make_spro       = False,             # Make a 'stripped .pro' file for each track. Storage intensive
             use_RAM         = False,              # Saves temporary SP files to RAM rather than hard disk to increase speed
             delete          = True,
+            log_f_name      = 'log.txt',
             output_dir = "/home/robbie/Dropbox/SP_LG/SP_LG_Output/",
             results_f_name = f'1151',  # Set the filename for the resulting .hdf5 file
             media_f_name = f'med',     # Set the name of the media file for SMRT (if created)
@@ -149,7 +150,7 @@ def SP_LG(track_no,
                              f'config_{track_no}.ini',
                              f'track_{track_no}.smet']
 
-            with open('SP_LG_Output/log.txt','ab') as log:
+            with open(f'{output_dir}{log_f_name}','ab') as log:
                 for file in deletion_list:
                     cleaner_command = ['rm', f'{file}']
                     subprocess.call(cleaner_command,
