@@ -1,3 +1,7 @@
+nul
+*.dir
+*.bak
+*.dat
 *.gif
 *.png
 *.ipynb
