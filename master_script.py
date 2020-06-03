@@ -54,12 +54,12 @@ if hpc_run:
     # tmp_dir = '/scratch/scratch/ucfarm0'
     tmp_dir = x
     aux_data_dir = '/home/ucfarm0/SP_LG/aux_data/'
-    output_dir = '/home/ucfarm0/Scratch/output/'
+    output_dir = '/home/ucfarm0/Scratch/'
     use_RAM = False
 
 else:
     tmp_dir = '/home/robbie/Dropbox/SP_LG/Snowpack_files'
-    aux_data_dir = '/home/robbie/Dropbox/Data/for_grace/'
+    aux_data_dir = '/home/robbie/Dropbox/Data/SP_LG_aux_data/'
     output_dir = "/home/robbie/Dropbox/SP_LG/SP_LG_Output/"
 
 ######################################################################
