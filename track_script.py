@@ -18,20 +18,21 @@ import datetime
 #########################################################################################
 
 def SP_LG(track_no,
-            year            = 2016,              # Choose a year
-            block_smrt      = True,             # Block SMRT from running - fast if you don't care about microwaves
-            save_media_list = False,             # Save a 'media' object suitable for SMRT to operate on
-            make_spro       = False,             # Make a 'stripped .pro' file for each track. Storage intensive
-            use_RAM         = False,              # Saves temporary SP files to RAM rather than hard disk to increase speed
-            delete          = True,
-            log_f_name      = 'log.txt',
-            output_dir = "/home/robbie/Dropbox/SP_LG/SP_LG_Output/",
-            results_f_name = f'1151',  # Set the filename for the resulting .hdf5 file
-            media_f_name = f'med',     # Set the name of the media file for SMRT (if created)
-            ram_dir = '/dev/shm/SP',          # Location of ram directory - if used
-            tmp_dir = '/home/robbie/Dropbox/SP_LG/Snowpack_files', # Location of temp hard disk location - if used
-            aux_dir = '/home/robbie/Dropbox/Data/for_grace/'):
+          run_dict):
 
+    year            = run_dict['year']              # Choose a year
+    block_smrt      = run_dict['block_smrt']         # Block SMRT from running - fast if you don't care about microwaves
+    save_media_list = run_dict['save_media_list']                         # Save a 'media' object suitable for SMRT to operate on
+    make_spro       = False                        # Make a 'stripped .pro' file for each track. Storage intensive
+    use_RAM         = run_dict['use_RAM']            # Saves temporary SP files to RAM rather than hard disk to increase speed
+    delete          = run_dict['delete']
+    log_f_name      = run_dict['log_f_name']
+    output_dir      = run_dict['delete']
+    results_f_name  = run_dict['results_f_name']  # Set the filename for the resulting .hdf5 file
+    media_f_name    = run_dict['media_f_name']     # Set the name of the media file for SMRT (if created)
+    ram_dir         = run_dict['ram_dir']          # Location of ram directory - if used
+    tmp_dir         = run_dict['tmp_dir']            # Location of temp hard disk location - if used
+    aux_dir         = run_dict['aux_dir']
 ###################################################################################
 
     # Model code below, do not modify

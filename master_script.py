@@ -3,7 +3,7 @@ import numpy as np
 import multiprocessing
 # import pro_utils
 # import os
-from SP_utils import dangerous_temp
+# from SP_utils import dangerous_temp
 # import time
 # import SP_utils
 # import subprocess
@@ -20,24 +20,37 @@ import datetime
 from track_script import SP_LG
 import psutil
 import time
+import sys
 import os
+from multi_track_utils import CL_parse, multi_track_run
 
 
 #####################################################################
 
 x = os.getcwd()
-print(x)
+
+if len(sys.argv) == 1: # Code is being run from the editor in test mode
+
+    CL_input =        {'start':200,
+                       'end':210,
+                       'spacing':1,
+                       'hpc':False}
+
+else:
+
+    CL_input = CL_parse(sys.argv)
 
 # CONFIGURATION
-grace_run = False
-cores = 1
+hpc_run = CL_input['hpc']
+year = 2016
 log_f_name = 'log.txt'
 ram_dir = '/dev/shm/SP'
+block_smrt=True
 use_RAM = True
 save_media_list = True
-log_level=logging.WARNING
+log_level=logging.DEBUG
 
-if grace_run:
+if hpc_run:
     # tmp_dir = '/scratch/scratch/ucfarm0'
     tmp_dir = x
     aux_data_dir = '/home/ucfarm0/SP_LG/aux_data/'
@@ -51,48 +64,25 @@ else:
 
 ######################################################################
 
-def multi_track_run(tracks_to_run,
-                    core=0,
-                    temp_control=True):
+# Configure run_dict
 
-    SNOWPACK_TIMER = []  # a list recording the duration of every SNOWPACK run.
+core = 'results'
 
-    for track_no in tracks_to_run:
+run_dict = {
+                  'year':year,
+                  'ram_dir':ram_dir,  # Location of ram directory
+                  'tmp_dir':tmp_dir,  # Location of temp hard disk location
+                  'results_f_name':f'series_results',
+                  'save_media_list':save_media_list,
+                  'log_f_name' : log_f_name,
+                  'media_f_name':f'series_media',
+                  'aux_dir':aux_data_dir,
+                  'block_smrt':block_smrt,
+                  'delete':True,
+                  'output_dir':output_dir,
+                  'use_RAM':use_RAM,
 
-        if temp_control:                    # Hold iteration if cores too hot
-            while dangerous_temp():
-                time.sleep(3)
-
-        ######################################################
-
-        x = SP_LG(track_no,
-                  ram_dir=ram_dir,  # Location of ram directory
-                  tmp_dir=tmp_dir,  # Location of temp hard disk location
-                  results_f_name=f'Core_{core}_',
-                  save_media_list=save_media_list,
-                  log_f_name = log_f_name,
-                  media_f_name=f'Core_{core}_med',
-                  aux_dir=aux_data_dir,
-                  delete=False,
-                  output_dir=output_dir,
-                  use_RAM=use_RAM)
-
-        ######################################################
-
-        if not np.isnan(x):
-            SNOWPACK_TIMER.append(x)
-
-    mean_time = np.nanmean(SNOWPACK_TIMER)
-    attempted_runs = len(list(tracks_to_run))
-    achieved_runs = len(SNOWPACK_TIMER)
-
-    return_dict = {'mean_time' : mean_time,
-                    'attempted_runs' : attempted_runs,
-                    'achieved_runs' : achieved_runs}
-
-    logging.critical(f'Core {core}: {return_dict}')
-
-    return(return_dict)
+                  }
 
 ############################################################
 
@@ -101,28 +91,36 @@ logging.basicConfig(level=log_level,
 
 logging.critical(f'Start time: {str(datetime.datetime.now())}')
 
+multi_track_run(tracks_to_run=trange(CL_input['start'],
+                                     CL_input['end'],
+                                     CL_input['spacing']),
+                run_dict=run_dict,
 
-
-
-
-processes = []
-
-for core in range(cores):
-
-    p = multiprocessing.Process(target = multi_track_run,
-                                args= (trange(core+200, 202, cores),),
-                                kwargs={'core':core})
-
-    p.start()
-
-    processes.append(p)
-
-for p in processes:
-    p.join()
+                temp_control=False)
 
 logging.critical(f'End time: {str(datetime.datetime.now())}')
 
 
+
+
+
+
+
+#
+# processes = []
+#
+# for core in range(cores):
+#
+#     p = multiprocessing.Process(target = multi_track_run,
+#                                 args= (trange(core+200, 202, cores),),
+#                                 kwargs={'core':core})
+#
+#     p.start()
+#
+#     processes.append(p)
+#
+# for p in processes:
+#     p.join()
 #
 #
 # year = 2016
@@ -134,4 +132,4 @@ logging.critical(f'End time: {str(datetime.datetime.now())}')
 #
 #     for key in track_keys:
 #         data = pd.read_hdf(f'SP_LG_Output/Core_{core}_{year}.hdf5', key=key, mode='r')
-#         data.to_hdf(f'SP_LG_Output/Cores_combined_{year}.hdf5', key=key, mode='a')
+#         data.to_hdf(f'SP_LG_Output/Cores_combined_{year}.hdf5', key=key, mode='a')year}.hdf5', key=key, mode='a')
