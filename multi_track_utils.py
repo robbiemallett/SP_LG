@@ -9,9 +9,9 @@ def CL_parse(arguments):
     if '-hpc' in arguments: hpc = True
     else: hpc = False
 
-    start_track = int(arguments[0])
-    end_track = int(arguments[1])
-    spacing = int(arguments[2])
+    start_track = int(arguments[1])
+    end_track = int(arguments[2])
+    spacing = int(arguments[3])
 
     return_dict = {'start':start_track,
                    'end':end_track,
