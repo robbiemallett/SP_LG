@@ -27,7 +27,6 @@ from multi_track_utils import CL_parse, multi_track_run
 
 #####################################################################
 
-x = os.getcwd()
 
 if len(sys.argv) == 1: # Code is being run from the editor in test mode
 
@@ -48,11 +47,10 @@ ram_dir = '/dev/shm/SP'
 block_smrt=True
 use_RAM = True
 save_media_list = True
-log_level=logging.DEBUG
+log_level=logging.WARNING
 
 if hpc_run:
-    # tmp_dir = '/scratch/scratch/ucfarm0'
-    tmp_dir = x
+    tmp_dir = os.getcwd()
     aux_data_dir = '/home/ucfarm0/SP_LG/aux_data/'
     output_dir = '/home/ucfarm0/Scratch/'
     use_RAM = False
@@ -72,10 +70,10 @@ run_dict = {
                   'year':year,
                   'ram_dir':ram_dir,  # Location of ram directory
                   'tmp_dir':tmp_dir,  # Location of temp hard disk location
-                  'results_f_name':f'series_results',
+                  'results_f_name':f'{CL_input["start"]}_results',
                   'save_media_list':save_media_list,
                   'log_f_name' : log_f_name,
-                  'media_f_name':f'series_media',
+                  'media_f_name':f'{CL_input["start"]}_media',
                   'aux_dir':aux_data_dir,
                   'block_smrt':block_smrt,
                   'delete':True,
