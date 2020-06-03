@@ -7,7 +7,7 @@
 #$ -l mem=1G
 
 # Request 15 gigabyte of TMPDIR space (default is 10 GB)
-#$ -l tmpfs=2G
+#$ -l tmpfs=15G
 
 # Set the name of the job.
 #$ -N testing

@@ -18,7 +18,7 @@ def create_smet_file(year,
 
     smet_file_name= f'{tmp_dir}/track_{track_no}.smet'
 
-    track = get(year, track_no, aux_dir)
+    track = get(year, track_no,aux_dir)
 
     my_track = classes.track(track, year, stop_date, aux_dir)
 
