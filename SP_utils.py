@@ -183,11 +183,3 @@ METEOPATH	=	{tmp_dir}
 
     f.close()
 
-def dangerous_temp():
-    temps =  psutil.sensors_temperatures()['coretemp']
-    too_hot = False
-    for i in temps:
-        if i[1] > 70:
-            too_hot = True
-
-    return(too_hot)

@@ -1,3 +1,6 @@
+*.bak
+*.dat
+*.dir
 *.gif
 *.png
 *.ipynb
@@ -10,6 +13,8 @@ gifs/**
 Snowpack_files/**
 __pycache__/**
 SP_LG_Output/**
+.ipynb_checkpoints
+.idea
 *.h5
 *.sno
 *.spro

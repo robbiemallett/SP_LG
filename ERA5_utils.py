@@ -41,7 +41,6 @@ def get_daylist(year):
 
 
 def add_reanalysis_to_track(my_track,aux_dir):
-    varlist = ['u10', 'v10', 't2m', 'ptype', 'asn', 'ssrd', 'strd', 'tp']
 
     list_of_dicts = []
 
@@ -62,6 +61,8 @@ def add_reanalysis_to_track(my_track,aux_dir):
 #
     relevant_months = set(df['month'])
 
+    varlist = ['u10', 'v10', 't2m', 'ptype', 'asn', 'ssrd', 'strd', 'tp']
+
     for month in relevant_months:
 
         df_m = df[df['month'] == month]
@@ -74,9 +75,6 @@ def add_reanalysis_to_track(my_track,aux_dir):
 
         with xr.open_dataset(f'{aux_dir}/ERA_{str(year)}_{str(month).zfill(2)}.nc') as data, \
                 xr.open_dataset(f'{aux_dir}/ERA_{year}_{str(month).zfill(2)}rh_.nc') as rh_data:
-
-            # data = Dataset(f'{era_dir}{str(year)}_{str(month).zfill(2)}.nc')
-            # rh_data = Dataset(f'{rh_dir}{year}_{str(month).zfill(2)}rh_.nc')
 
             for index, row in df_m.iterrows():
 
