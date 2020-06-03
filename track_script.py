@@ -27,7 +27,7 @@ def SP_LG(track_no,
     use_RAM         = run_dict['use_RAM']            # Saves temporary SP files to RAM rather than hard disk to increase speed
     delete          = run_dict['delete']
     log_f_name      = run_dict['log_f_name']
-    output_dir      = run_dict['delete']
+    output_dir      = run_dict['output_dir']
     results_f_name  = run_dict['results_f_name']  # Set the filename for the resulting .hdf5 file
     media_f_name    = run_dict['media_f_name']     # Set the name of the media file for SMRT (if created)
     ram_dir         = run_dict['ram_dir']          # Location of ram directory - if used
@@ -47,7 +47,6 @@ def SP_LG(track_no,
     if not os.path.exists(tmp_dir):
         os.mkdir(tmp_dir)
 
-    # print(f'Track number: {track_no}')
     logging.info(f'Track Number: {track_no}')
 
     # Now create a .smet file of reanalysis and return a track object
