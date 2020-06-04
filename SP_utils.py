@@ -11,24 +11,10 @@ def run(end_date,
         track_no,
         tmp_dir):
 
-    # SP_command = f'snowpack -c {tmp_dir}/config_{track_no}.ini -e {end_date} 1> log.txt'
-    # subprocess.run(SP_command,shell=True)
-
-    #############################################################################################
-
-    # args = ['snowpack', '-c', f'{tmp_dir}/config_{track_no}.ini', '-e', f'{end_date}', '1>', 'log.txt']
-    # with open('SP_output.txt', 'a') as f:
-    #     sp_output = subprocess.run(args, shell=False, stdout=f, text = True)
-    # if sp_output.returncode != 0:
-    #     print(sp_output.stderr)
-
-    #########################################################
-
     args = ['snowpack', '-c', f'{tmp_dir}/config_{track_no}.ini', '-e', f'{end_date}']
 
     start_timer = time.time()
 
-    # with open(f'log.txt', 'ab') as log:
     sp_output = subprocess.call(args,
                                     cwd=f'{tmp_dir}',
                                     stdout=subprocess.DEVNULL)
@@ -48,6 +34,7 @@ def get_init_vals(start_date,start_loc,aux_dir):
     if start_date.month == 8: # If ice parcel exists at start of simulation, then take W99 or
 
         pio_data = get_pio_field(start_date.year,start_date.month, pio_dir=aux_dir)
+
         w99_thick_field = get_w99_field(start_date.year,10,w99_dir=aux_dir)['depth']
 
         pio_thick_field = pio_data['thickness']
@@ -59,20 +46,17 @@ def get_init_vals(start_date,start_loc,aux_dir):
         distance, index = EASE_tree.query(start_loc)
         nearest_index = np.unravel_index(index, (361, 361))
 
-        # pio_thick_field = get_field('piomas',start_date.month,start_date.year,variable='thickness',resolution=361)['field']
-        # w99_thick_field = get_field('w99',start_date.month,start_date.year,variable='depth',resolution=361)['field']
-
         pio_thick_point, w99_thick_point = pio_thick_field[nearest_index], w99_thick_field[nearest_index]
 
         if (np.isnan(w99_thick_point)) or (w99_thick_point < 0.01):
 
-            # logging.info(f'Problematic snow depth: {w99_thick_point}')
-
             w99_thick_point = 0.01
     else:
-        pio_thick_point, w99_thick_point = 0.2, 0.01
 
-    return(pio_thick_point, w99_thick_point)
+        pio_thick_point, w99_thick_point = 0.15, 0.01
+
+    # return(pio_thick_point, w99_thick_point)
+    return(pio_thick_point, 0.01)
 
 def get_w99_field(year,month,w99_dir):
 

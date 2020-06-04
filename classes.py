@@ -72,6 +72,7 @@ class snowpro:
     and variables such as date, snow height and ice thickness"""
 
     def __init__(self, iceframe, snowframe, datetime):
+
         self.iceframe = iceframe
         self.snowframe = snowframe
         self.datetime = datetime
@@ -79,25 +80,8 @@ class snowpro:
         self.snowdensity = np.mean(snowframe['element density (kg m-3)'])
         self.icethickness = np.sum(iceframe['thickness_m'])
 
-class evolving_pack:
-
-    """A snowpack that evolves through time"""
-
-    def __init__(self):
-        self.TbH_series = []
-        self.TbV_series = []
-        self.ice_thickness_series = []
-        self.snow_depth_series = []
-        self.datetime_series = []
-        self.GR_series = []
-        self.Comiso_SD_series = []
-
-    def update_pack(self,snowpro):
-        self.TbH_series.append(snowpro.smrt_res.TbH())
-        self.TbV_series.append(snowpro.smrt_res.TbV())
-        self.ice_thickness_series.append(snowpro.icethickness)
-        self.snow_depth_series.append(snowpro.snowdepth)
-        self.datetime_series.append(snowpro.datetime)
-
-
-
+        if snowframe.empty:
+            self.sst, self.ist = np.nan, np.nan
+        else:
+            self.sst = snowframe['element temperature (degC)'].iloc[0]
+            self.ist = snowframe['element temperature (degC)'].iloc[-1]

@@ -24,5 +24,5 @@
 
 # 8. Run the application.
 
-python3 master_script.py $SGE_TASK_ID 210 1 -hpc
+python3 /home/ucfarm0/SP_LG/SP_LG/master_script.py $SGE_TASK_ID 210 1 -hpc
 

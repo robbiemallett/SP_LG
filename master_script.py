@@ -45,8 +45,9 @@ year = 2016
 log_f_name = 'log.txt'
 ram_dir = '/dev/shm/SP'
 block_smrt=True
-use_RAM = True
-save_media_list = True
+delete=True
+use_RAM = False
+save_media_list = False
 log_level=logging.WARNING
 
 if hpc_run:
@@ -76,7 +77,7 @@ run_dict = {
                   'media_f_name':f'{CL_input["start"]}_media',
                   'aux_dir':aux_data_dir,
                   'block_smrt':block_smrt,
-                  'delete':True,
+                  'delete':delete,
                   'output_dir':output_dir,
                   'use_RAM':use_RAM,
 
@@ -87,7 +88,8 @@ run_dict = {
 logging.basicConfig(level=log_level,
                     filename=f'{output_dir}{log_f_name}')
 
-logging.critical(f'Start time: {str(datetime.datetime.now())}')
+start_time = str(datetime.datetime.now())
+
 
 multi_track_run(tracks_to_run=trange(CL_input['start'],
                                      CL_input['end'],
@@ -96,6 +98,7 @@ multi_track_run(tracks_to_run=trange(CL_input['start'],
 
                 temp_control=False)
 
+logging.critical(f'Start time: {start_time}')
 logging.critical(f'End time: {str(datetime.datetime.now())}')
 
 

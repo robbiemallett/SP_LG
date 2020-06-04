@@ -2,20 +2,8 @@ import datetime
 import pandas as pd
 import os
 import numpy as np
-# from smrt import make_snowpack, make_ice_column, make_model, sensor_list
 from classes import snowpro
-import smrt
-
-
-
-# def print_preamble(filename):
-#     '''Iterates through a .PRO file until it finds the line [DATA].
-#     It then prints out the header with all the metainformation'''
-#
-#     with open(filename, "r") as f:
-#         for line in enumerate(iter(f.readline, '[DATA]\n'), start=1):
-#             print(line)
-
+import logging
 
 def read(track_no,tmp_dir):
     '''Reads a .PRO file line by line,
@@ -55,9 +43,58 @@ def read(track_no,tmp_dir):
 
     series_length = len(variables['Date'])
 
-    profile_list = [snowpro_from_snapshot(x, variables) for x in range(series_length)]
+    snowpro_list = [snowpro_from_snapshot(date, variables) for date in range(series_length)]
 
-    return (profile_list)
+    return (snowpro_list)
+
+
+def snowpro_from_snapshot(entry, variables):
+
+    """This function takes a dictionary of variables (a processed .Pro file) and returns two dataframes for a given
+    point in time; one for ice and one for snow"""
+
+    dataframe_dict = {}
+
+    for varname in variables.keys():
+
+        if varname == 'Date':
+
+            my_datetime = series_from_line(variables, varname, entry)
+
+        else:
+
+            dataframe_dict[varname] = series_from_line(variables, varname, entry)
+
+    df = pd.DataFrame(dataframe_dict)
+
+    h_0 = df['height [> 0: top, < 0: bottom of elem.] (cm)'][0]
+    diffheights = [height - h_0 for height in df['height [> 0: top, < 0: bottom of elem.] (cm)']]
+
+    thickness = [-999]
+    for i in range(len(diffheights) - 1):
+        thickness.append((diffheights[i + 1] - diffheights[i])/100)
+
+    df['thickness_m'] = thickness
+
+    df = df.iloc[1:].copy()
+
+    # Reverse order so it fits into SMRT
+    df = df.iloc[::-1].copy()
+
+    ice_df = df[df['grain type (Swiss Code F1F2F3)'] == 880]
+    snow_df = df[df['grain type (Swiss Code F1F2F3)'] != 880]
+
+    continuous = all(a-1==b for a, b in zip(snow_df.index, snow_df.index[1:]))
+
+    if not continuous:
+        logging.critical('Indicies not continuous - icy layer!')
+        print(snow_df.index)
+
+    # Make an object with the dataframes, the date of the profile and thickness of ice and snow.
+    my_snowpro = snowpro(ice_df, snow_df, my_datetime)
+
+    return(my_snowpro)
+
 
 
 def pro_code_dict(code=False,return_all=False):
@@ -147,47 +184,6 @@ def series_from_line(variables, varname, index):
     else:
 
         return (datetime.datetime.strptime(series[1][:-1], "%d.%m.%Y %H:%M:%S"))
-
-def snowpro_from_snapshot(entry, variables):
-
-    """This function takes a dictionary of variables (a processed .Pro file) and returns two dataframes for a given
-    point in time; one for ice and one for snow"""
-
-    dataframe_dict = {}
-
-    for varname in variables.keys():
-
-        if varname == 'Date':
-
-            my_datetime = series_from_line(variables, varname, entry)
-
-        else:
-
-            dataframe_dict[varname] = series_from_line(variables, varname, entry)
-
-    df = pd.DataFrame(dataframe_dict)
-
-    h_0 = df['height [> 0: top, < 0: bottom of elem.] (cm)'][0]
-    diffheights = [height - h_0 for height in df['height [> 0: top, < 0: bottom of elem.] (cm)']]
-
-    thickness = [-999]
-    for i in range(len(diffheights) - 1):
-        thickness.append((diffheights[i + 1] - diffheights[i])/100)
-
-    df['thickness_m'] = thickness
-
-    df = df.iloc[1:].copy()
-
-    # Reverse order so it fits into SMRT
-    df = df.iloc[::-1].copy()
-
-    ice_df = df[df['grain type (Swiss Code F1F2F3)'] == 880]
-    snow_df = df[df['grain type (Swiss Code F1F2F3)'] != 880]
-
-    # Make an object with the dataframes, the date of the profile and thickness of ice and snow.
-    snapshot = snowpro(ice_df, snow_df, my_datetime)
-
-    return (snapshot)
 
 def pro_stripper(track_no,
                  dir='SP_LG_Output/'):

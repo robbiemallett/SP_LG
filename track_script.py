@@ -88,7 +88,7 @@ def SP_LG(track_no,
                          tmp_dir = tmp_dir,
                          track_no = track_no)
 
-            pro_list = pro_utils.read(track_no, tmp_dir)                # Read the .pro file into a profile object
+            snowpro_list = pro_utils.read(track_no, tmp_dir)                # Read the .pro file into a profile object
 
             # Prep media for SMRT to operate on if required
 
@@ -96,7 +96,7 @@ def SP_LG(track_no,
 
             if save_media_list or (not block_smrt):
 
-                mediums_list = [smrt_utils.prep_medium(snowpro) for snowpro in pro_list]
+                mediums_list = [smrt_utils.prep_medium(snowpro) for snowpro in snowpro_list]
 
                 if save_media_list:
 
@@ -117,7 +117,7 @@ def SP_LG(track_no,
                                                             [19e9, 37e9])
                     end_timer = time.time()
 
-                    print(f'time to run SMRT: {int(end_timer - start_timer)} s')
+                    logging.debug(f'time to run SMRT: {int(end_timer - start_timer)} s')
 
                 else: smrt_res = None
 
@@ -125,13 +125,13 @@ def SP_LG(track_no,
 
             # Process results
 
-            results = smrt_utils.process_results(pro_list, smrt_res, [19e9, 37e9])
+            results = smrt_utils.process_results(snowpro_list, smrt_res, [19e9, 37e9])
 
             results['coords'] = my_track.frame['track_coords']
 
             # Save the results
 
-            results.to_hdf(f'{output_dir}{results_f_name}{year}.hdf5', key=f'{str(track_no)}', mode='a')
+            results.to_hdf(f'{output_dir}{results_f_name}{year}.hdf5', key=f't_{track_no}', mode='a')
 
             if make_spro == True:
                 os.system(f'mv {tmp_dir}/{track_no}_SPLG.pro SP_LG_Output/{track_no}.pro')

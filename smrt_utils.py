@@ -15,9 +15,11 @@ def process_results(snowpro_list,smrt_res,frequencies):
                     'snow_depth' : [snowpro.snowdepth for snowpro in snowpro_list],
                     'snow_density' : [snowpro.snowdensity for snowpro in snowpro_list],
                     'ice_thickness' : [snowpro.icethickness for snowpro in snowpro_list],
-                    'date' : [snowpro.datetime.date() for snowpro in snowpro_list]
+                    'date' : [snowpro.datetime.date() for snowpro in snowpro_list],
+                    'snow_surface_temp' : [snowpro.sst for snowpro in snowpro_list],
+                    'ice_snow_temp': [snowpro.ist for snowpro in snowpro_list]
 
-                    }
+    }
 
     if smrt_res != None:
 
