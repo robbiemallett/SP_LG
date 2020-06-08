@@ -33,6 +33,7 @@ def SP_LG(track_no,
     ram_dir         = run_dict['ram_dir']          # Location of ram directory - if used
     tmp_dir         = run_dict['tmp_dir']            # Location of temp hard disk location - if used
     aux_dir         = run_dict['aux_dir']
+    parallel        = run_dict['parallel']
 ###################################################################################
 
     # Model code below, do not modify
@@ -76,6 +77,7 @@ def SP_LG(track_no,
                                     tmp_dir=tmp_dir,
                                     aux_dir=aux_dir)
 
+
             SP_utils.create_ini_file(track_no=track_no,
                                      tmp_dir=tmp_dir,
                                      aux_dir=aux_dir)
@@ -96,7 +98,7 @@ def SP_LG(track_no,
 
             if save_media_list or (not block_smrt):
 
-                mediums_list = [smrt_utils.prep_medium(snowpro) for snowpro in snowpro_list]
+                mediums_list = [smrt_utils.prep_medium(snowpro,my_track.info['ice_type']) for snowpro in snowpro_list]
 
                 if save_media_list:
 
@@ -111,13 +113,21 @@ def SP_LG(track_no,
 
                 if block_smrt == False:
 
-                    start_timer = time.time() #Baseline for timing the SMRT run
+                    try:
 
-                    smrt_res = smrt_utils.run_media_series(mediums_list,
-                                                            [19e9, 37e9])
-                    end_timer = time.time()
+                        start_timer = time.time() #Baseline for timing the SMRT run
 
-                    logging.debug(f'time to run SMRT: {int(end_timer - start_timer)} s')
+                        smrt_res = smrt_utils.run_media_series(mediums_list,
+                                                                [19e9, 37e9],
+                                                               pol=['V', 'H'],
+                                                               parallel=parallel)
+                        end_timer = time.time()
+
+                        logging.debug(f'time to run SMRT: {int(end_timer - start_timer)} s')
+
+                    except Exception as e:
+                        print(e)
+                        smrt_res= None
 
                 else: smrt_res = None
 

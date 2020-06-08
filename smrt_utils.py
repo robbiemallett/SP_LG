@@ -1,6 +1,9 @@
 import numpy as np
 import pro_utils
 from smrt import make_snowpack, make_ice_column, make_model, sensor_list
+from smrt.permittivity.saline_snow import saline_snow_permittivity_geldsetzer09
+from smrt.permittivity.saline_ice import saline_ice_permittivity_pvs_mixing
+
 import os
 import sys
 import logging
@@ -34,14 +37,14 @@ def process_results(snowpro_list,smrt_res,frequencies):
     return(df)
 
 
-
 def prep_medium(snowpro,
-                brine_inc_corr_len=1.0e-3):
+                ice_type):
+
+    brine_inc_corr_len = 1.0e-3
 
     snow_df, ice_df = snowpro.snowframe, snowpro.iceframe
 
-
-    # Establish correlation length using Vargel 2020
+    # Get the ice type in order to model the ice scatterers
 
     SSA = 3/((0.917/2)*np.array(snow_df['optical equivalent grain size (mm)']))
     IVF = np.array(snow_df['ice volume fraction (%)'])/100
@@ -57,17 +60,29 @@ def prep_medium(snowpro,
 
                              density=snow_df['element density (kg m-3)'],
 
-                             salinity=snow_df['bulk salinity (g/kg)'] / 1000)
+                             salinity=snow_df['bulk salinity (g/kg)'] / 1000,
 
-    ice_col = make_ice_column(ice_type='firstyear',
+                             ice_permittivity_model = saline_snow_permittivity_geldsetzer09)
+
+    ice_col = make_ice_column(ice_type=ice_type,
+
                               thickness=ice_df['thickness_m'],
+
                               temperature=ice_df['element temperature (degC)'] + 273.15,
+
                               microstructure_model='exponential',
+
                               corr_length=np.array([brine_inc_corr_len] * len(ice_df['thickness_m'])),
+
                               brine_inclusion_shape='spheres',
+
                               salinity=ice_df['bulk salinity (g/kg)'] / 1000,
+
                               density=ice_df['element density (kg m-3)'],
-                              add_water_substrate='ocean')
+
+                              add_water_substrate='ocean',
+
+                              ice_permittivity_model = saline_ice_permittivity_pvs_mixing)
 
     medium = snowpack + ice_col
 
@@ -76,9 +91,10 @@ def prep_medium(snowpro,
 
 def run_media_series(mediums_list,
                  frequencies,
+                 pol,
+                 parallel,
                  solver='dort',
-                 angle=55,
-                 pol='V'):
+                 angle=55):
 
 
     # create the sensor
@@ -87,11 +103,15 @@ def run_media_series(mediums_list,
     n_max_stream = 32  # TB calculation is more accurate if number of streams is increased (currently: default = 32);
 
     m = make_model("iba", solver,
-                   rtsolver_options={"n_max_stream": n_max_stream})
+                   rtsolver_options={"n_max_stream": n_max_stream,
+                                     'prune_deep_snowpack':5})
 
     # run the model for snow-covered sea ice:
 
-    res = m.run(radiometer, mediums_list, progressbar=True)
+    res = m.run(radiometer,
+                mediums_list,
+                progressbar=True,
+                parallel_computation=parallel)
 
     # CODE FOR SWITCHING TO DMRT IN EVENT OF DORT FAILURE:
     #

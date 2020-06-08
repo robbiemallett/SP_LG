@@ -39,12 +39,18 @@ class track:
 
                 logging.info(f'Start:{track_existance[0]}. End:{track_existance[-1]}')
 
+                if startday == datetime.date(year=year, month=8, day=31):
+                    ice_type = 'firstyear'
+                else:
+                    ice_type = 'multiyear'
+
                 self.info = {'start_day' : startday,
-                                      'end_day' : end_day,
-                                      'start_date' : track_existance[0],
-                                      'end_date' : track_existance[-1],
-                                      'start_coords' : valid_track_trimmed[0],
-                                      'end_coords': valid_track_trimmed[-1]}
+                              'end_day' : end_day,
+                              'start_date' : track_existance[0],
+                              'end_date' : track_existance[-1],
+                              'start_coords' : valid_track_trimmed[0],
+                              'end_coords': valid_track_trimmed[-1],
+                              'ice_type':ice_type}
 
                 ERA5_grid = get_grid(aux_dir=aux_dir)
 

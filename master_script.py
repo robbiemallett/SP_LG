@@ -44,10 +44,11 @@ hpc_run = CL_input['hpc']
 year = 2016
 log_f_name = 'log.txt'
 ram_dir = '/dev/shm/SP'
-block_smrt=True
+block_smrt=False
 delete=True
 use_RAM = False
 save_media_list = False
+parallel_SMRT=False
 log_level=logging.WARNING
 
 if hpc_run:
@@ -55,6 +56,7 @@ if hpc_run:
     aux_data_dir = '/home/ucfarm0/SP_LG/aux_data/'
     output_dir = '/home/ucfarm0/Scratch/'
     use_RAM = False
+    parallel_SMRT=False
 
 else:
     tmp_dir = '/home/robbie/Dropbox/SP_LG/Snowpack_files'
@@ -80,6 +82,7 @@ run_dict = {
                   'delete':delete,
                   'output_dir':output_dir,
                   'use_RAM':use_RAM,
+                  'parallel':parallel_SMRT
 
                   }
 

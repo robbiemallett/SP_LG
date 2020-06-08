@@ -1,3 +1,4 @@
+*.npy
 *.dir
 *.bak
 *.dat
