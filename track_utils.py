@@ -24,7 +24,8 @@ def create_smet_file(year,
 
     if my_track.valid_data:
 
-        rean = ERA5_utils.add_reanalysis_to_track(my_track,aux_dir=aux_dir)
+        rean = ERA5_utils.add_reanalysis_to_track(my_track,
+                                                  aux_dir=aux_dir)
 
         full = ERA5_utils.add_derived_vars_to_track(rean)
 
