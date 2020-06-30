@@ -2,6 +2,7 @@ from tqdm import trange
 from dill import Pickler, Unpickler
 import shelve
 shelve.Pickler = Pickler
+import types
 shelve.Unpickler = Unpickler
 import logging
 import datetime
@@ -16,7 +17,7 @@ from multi_track_utils import CL_parse, multi_track_run
 if len(sys.argv) == 1: # Code is being run from the editor in test mode
 
     CL_input =        {'start':200,
-                       'end':220,
+                       'end':202,
                        'spacing':1,
                        'hpc':False}
 
@@ -26,58 +27,42 @@ else:
 
 # CONFIGURATION
 
-hpc_run = CL_input['hpc']
-year = 2016
-log_f_name = 'log.txt'
-ram_dir = '/dev/shm/SP'
-block_smrt=False
-delete=True
-use_RAM = False
-save_media_list = False
-parallel_SMRT=False
-log_level=logging.WARNING
-snow_model = 'degree_days' # can be 'snowpack', 'degree_days' or 'nesosim'
+config = types.SimpleNamespace() #Makes an empty object
 
-if hpc_run:
-    tmp_dir = os.getcwd()
-    aux_data_dir = '/home/ucfarm0/SP_LG/aux_data/'
-    output_dir = '/home/ucfarm0/Scratch/'
-    use_RAM = False
-    parallel_SMRT=False
+config.hpc_run = CL_input['hpc']
+config.year = 2016
+config.log_f_name = 'log.txt'
+config.ram_dir = '/dev/shm/SP'
+config.block_smrt=False
+config.delete=True
+config.use_RAM = False
+config.save_media_list = False
+config.parallel_SMRT=False
+config.log_level=logging.WARNING
+config.snow_model = 'snowpack' # can be 'snowpack', 'degree_days' or 'nesosim'
+config.results_f_name = 'result'
+config.make_spro = False
+
+if config.hpc_run:
+    config.tmp_dir = os.getcwd()
+    config.aux_data_dir = '/home/ucfarm0/SP_LG/aux_data/'
+    config.output_dir = '/home/ucfarm0/Scratch/'
+    config.use_RAM = False
+    config.parallel_SMRT=False
 
 else:
-    tmp_dir = '/home/robbie/Dropbox/SP_LG/Snowpack_files'
-    aux_data_dir = '/home/robbie/Dropbox/Data/SP_LG_aux_data/'
-    output_dir = "/home/robbie/Dropbox/SP_LG/SP_LG_Output/"
+    config.tmp_dir = '/home/robbie/Dropbox/SP_LG/Snowpack_files'
+    config.aux_data_dir = '/home/robbie/Dropbox/Data/SP_LG_aux_data/'
+    config.output_dir = "/home/robbie/Dropbox/SP_LG/SP_LG_Output/"
 
 ######################################################################
 
 # Configure run_dict
 
-core = 'results'
-
-run_dict = {
-                  'year':year,
-                  'ram_dir':ram_dir,  # Location of ram directory
-                  'tmp_dir':tmp_dir,  # Location of temp hard disk location
-                  'results_f_name':f'{CL_input["start"]}_results',
-                  'save_media_list':save_media_list,
-                  'log_f_name' : log_f_name,
-                  'media_f_name':f'{CL_input["start"]}_media',
-                  'aux_dir':aux_data_dir,
-                  'block_smrt':block_smrt,
-                  'delete':delete,
-                  'output_dir':output_dir,
-                  'use_RAM':use_RAM,
-                  'parallel':parallel_SMRT,
-                  'snow_model':snow_model,
-
-                  }
-
 ############################################################
 
-logging.basicConfig(level=log_level,
-                    filename=f'{output_dir}{log_f_name}')
+logging.basicConfig(level=config.log_level,
+                    filename=f'{config.output_dir}{config.log_f_name}')
 
 start_time = str(datetime.datetime.now())
 
@@ -85,7 +70,7 @@ start_time = str(datetime.datetime.now())
 multi_track_run(tracks_to_run=trange(CL_input['start'],
                                      CL_input['end'],
                                      CL_input['spacing']),
-                run_dict=run_dict,
+                config=config,
 
                 temp_control=False)
 

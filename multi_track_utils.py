@@ -22,7 +22,7 @@ def CL_parse(arguments):
 
 
 def multi_track_run(tracks_to_run,
-                    run_dict,
+                    config,
                     temp_control=True):
 
     SNOWPACK_TIMER = []  # a list recording the duration of every SNOWPACK run.
@@ -34,7 +34,7 @@ def multi_track_run(tracks_to_run,
                 time.sleep(3)
 
         x = SP_LG(track_no,
-                  run_dict)
+                  config)
 
         if not np.isnan(x):
             SNOWPACK_TIMER.append(x)

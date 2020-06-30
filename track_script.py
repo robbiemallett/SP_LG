@@ -1,12 +1,10 @@
 import numpy as np
-import psutil
 import pro_utils
 import os
 import time
 import SP_utils
 import subprocess
-from tqdm import trange
-from dill import Pickler, Unpickler  # Necessary to store the SMRT objects for later analysiss
+from dill import Pickler, Unpickler
 import shelve
 shelve.Pickler = Pickler
 shelve.Unpickler = Unpickler
@@ -19,22 +17,10 @@ import datetime
 #########################################################################################
 
 def SP_LG(track_no,
-          run_dict):
-    year = run_dict['year']  # Choose a year
-    block_smrt = run_dict['block_smrt']  # Block SMRT from running - fast if you don't care about microwaves
-    save_media_list = run_dict['save_media_list']  # Save a 'media' object suitable for SMRT to operate on
-    make_spro = False  # Make a 'stripped .pro' file for each track. Storage intensive
-    use_RAM = run_dict['use_RAM']  # Saves temporary SP files to RAM rather than hard disk to increase speed
-    delete = run_dict['delete']
-    log_f_name = run_dict['log_f_name']
-    output_dir = run_dict['output_dir']
-    results_f_name = run_dict['results_f_name']  # Set the filename for the resulting .hdf5 file
-    media_f_name = run_dict['media_f_name']  # Set the name of the media file for SMRT (if created)
-    ram_dir = run_dict['ram_dir']  # Location of ram directory - if used
-    tmp_dir = run_dict['tmp_dir']  # Location of temp hard disk location - if used
-    aux_dir = run_dict['aux_dir']
-    parallel = run_dict['parallel']
-    model_name = run_dict['snow_model'].lower()
+          config):
+    year = config.year  # Choose a year
+    tmp_dir = config.tmp_dir  # Location of temp hard disk location - if used
+    model_name = config.snow_model.lower()
 
     ###################################################################################
 
@@ -44,8 +30,8 @@ def SP_LG(track_no,
                                    month=5,
                                    day=1)
 
-    if use_RAM:
-        tmp_dir = ram_dir
+    if config.use_RAM:
+        tmp_dir = config.ram_dir
 
     if not os.path.exists(tmp_dir):
         os.mkdir(tmp_dir)
@@ -58,7 +44,7 @@ def SP_LG(track_no,
                                            track_no=track_no,
                                            stop_date=hard_stop_date,
                                            tmp_dir=tmp_dir,
-                                           aux_dir=aux_dir,
+                                           aux_dir=config.aux_data_dir,
                                            model_name=model_name)
 
     if my_track.valid_data == False:
@@ -78,11 +64,11 @@ def SP_LG(track_no,
                                          start_loc=my_track.info['start_coords'],
                                          track_no=track_no,
                                          tmp_dir=tmp_dir,
-                                         aux_dir=aux_dir)
+                                         aux_dir=config.aux_data_dir)
 
                 SP_utils.create_ini_file(track_no=track_no,
                                          tmp_dir=tmp_dir,
-                                         aux_dir=aux_dir)
+                                         aux_dir=config.aux_data_dir)
 
             ###################################################################################
 
@@ -101,20 +87,20 @@ def SP_LG(track_no,
 
                 ##########################################################################################
 
-                if save_media_list or (not block_smrt):
+                if config.save_media_list or (not config.block_smrt):
 
                     mediums_list = [smrt_utils.prep_medium(snowpro, my_track.info['ice_type']) for snowpro in snowpro_list]
 
-                    if save_media_list:
+                    if config.save_media_list:
                         # Shelve the list of objects under the track_no
-                        shelf_dir = f"{output_dir}{media_f_name}_{year}"
+                        shelf_dir = f"{config.output_dir}{config.media_f_name}_{year}"
 
                         with shelve.open(shelf_dir, 'c') as d:
                             d[str(track_no)] = mediums_list
 
                 # Run SMRT on the list of media
 
-                if not block_smrt:
+                if not config.block_smrt:
 
                     try:
 
@@ -123,7 +109,7 @@ def SP_LG(track_no,
                         smrt_res = smrt_utils.run_media_series(mediums_list,
                                                                [19e9, 37e9],
                                                                pol=['V', 'H'],
-                                                               parallel=parallel)
+                                                               parallel=config.parallel_SMRT)
                         end_timer = time.time()
 
                         logging.debug(f'time to run SMRT: {int(end_timer - start_timer)} s')
@@ -149,9 +135,9 @@ def SP_LG(track_no,
 
             # Save the results
 
-            results.to_hdf(f'{output_dir}{results_f_name}{year}.hdf5', key=f't_{track_no}', mode='a')
+            results.to_hdf(f'{config.output_dir}{config.results_f_name}{year}.hdf5', key=f't_{track_no}', mode='a')
 
-            if make_spro == True:
+            if config.make_spro == True:
                 os.system(f'mv {tmp_dir}/{track_no}_SPLG.pro SP_LG_Output/{track_no}.pro')
                 pro_utils.pro_stripper(track_no)
 
@@ -159,7 +145,7 @@ def SP_LG(track_no,
             logging.exception(f'{track_no}')
             my_track.duration = np.nan
 
-        if delete and (model_name == 'snowpack'):
+        if config.delete and (model_name == 'snowpack'):
             deletion_list = [f'{track_no}_SPLG.haz',
                              f'{track_no}_SPLG.ini',
                              f'{track_no}_SPLG.sno',
@@ -167,7 +153,7 @@ def SP_LG(track_no,
                              f'config_{track_no}.ini',
                              f'track_{track_no}.smet']
 
-            with open(f'{output_dir}{log_f_name}', 'ab') as log:
+            with open(f'{config.output_dir}{config.log_f_name}', 'ab') as log:
                 for file in deletion_list:
                     cleaner_command = ['rm', f'{file}']
                     subprocess.call(cleaner_command,
