@@ -1,25 +1,10 @@
-import numpy as np
-# import pandas as pd
-import multiprocessing
-# import pro_utils
-# import os
-# from SP_utils import dangerous_temp
-# import time
-# import SP_utils
-# import subprocess
-# import h5py
 from tqdm import trange
 from dill import Pickler, Unpickler
 import shelve
 shelve.Pickler = Pickler
 shelve.Unpickler = Unpickler
-# import smrt_utils
-# import track_utils
 import logging
 import datetime
-from track_script import SP_LG
-import psutil
-import time
 import sys
 import os
 from multi_track_utils import CL_parse, multi_track_run
@@ -31,7 +16,7 @@ from multi_track_utils import CL_parse, multi_track_run
 if len(sys.argv) == 1: # Code is being run from the editor in test mode
 
     CL_input =        {'start':200,
-                       'end':210,
+                       'end':220,
                        'spacing':1,
                        'hpc':False}
 
@@ -40,6 +25,7 @@ else:
     CL_input = CL_parse(sys.argv)
 
 # CONFIGURATION
+
 hpc_run = CL_input['hpc']
 year = 2016
 log_f_name = 'log.txt'
@@ -50,6 +36,7 @@ use_RAM = False
 save_media_list = False
 parallel_SMRT=False
 log_level=logging.WARNING
+snow_model = 'degree_days' # can be 'snowpack', 'degree_days' or 'nesosim'
 
 if hpc_run:
     tmp_dir = os.getcwd()
@@ -82,7 +69,8 @@ run_dict = {
                   'delete':delete,
                   'output_dir':output_dir,
                   'use_RAM':use_RAM,
-                  'parallel':parallel_SMRT
+                  'parallel':parallel_SMRT,
+                  'snow_model':snow_model,
 
                   }
 

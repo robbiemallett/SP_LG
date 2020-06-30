@@ -6,7 +6,7 @@ import time
 import SP_utils
 import subprocess
 from tqdm import trange
-from dill import Pickler, Unpickler    # Necessary to store the SMRT objects for later analysiss
+from dill import Pickler, Unpickler  # Necessary to store the SMRT objects for later analysiss
 import shelve
 shelve.Pickler = Pickler
 shelve.Unpickler = Unpickler
@@ -15,26 +15,28 @@ import track_utils
 import logging
 import datetime
 
+
 #########################################################################################
 
 def SP_LG(track_no,
           run_dict):
+    year = run_dict['year']  # Choose a year
+    block_smrt = run_dict['block_smrt']  # Block SMRT from running - fast if you don't care about microwaves
+    save_media_list = run_dict['save_media_list']  # Save a 'media' object suitable for SMRT to operate on
+    make_spro = False  # Make a 'stripped .pro' file for each track. Storage intensive
+    use_RAM = run_dict['use_RAM']  # Saves temporary SP files to RAM rather than hard disk to increase speed
+    delete = run_dict['delete']
+    log_f_name = run_dict['log_f_name']
+    output_dir = run_dict['output_dir']
+    results_f_name = run_dict['results_f_name']  # Set the filename for the resulting .hdf5 file
+    media_f_name = run_dict['media_f_name']  # Set the name of the media file for SMRT (if created)
+    ram_dir = run_dict['ram_dir']  # Location of ram directory - if used
+    tmp_dir = run_dict['tmp_dir']  # Location of temp hard disk location - if used
+    aux_dir = run_dict['aux_dir']
+    parallel = run_dict['parallel']
+    model_name = run_dict['snow_model'].lower()
 
-    year            = run_dict['year']              # Choose a year
-    block_smrt      = run_dict['block_smrt']         # Block SMRT from running - fast if you don't care about microwaves
-    save_media_list = run_dict['save_media_list']                         # Save a 'media' object suitable for SMRT to operate on
-    make_spro       = False                        # Make a 'stripped .pro' file for each track. Storage intensive
-    use_RAM         = run_dict['use_RAM']            # Saves temporary SP files to RAM rather than hard disk to increase speed
-    delete          = run_dict['delete']
-    log_f_name      = run_dict['log_f_name']
-    output_dir      = run_dict['output_dir']
-    results_f_name  = run_dict['results_f_name']  # Set the filename for the resulting .hdf5 file
-    media_f_name    = run_dict['media_f_name']     # Set the name of the media file for SMRT (if created)
-    ram_dir         = run_dict['ram_dir']          # Location of ram directory - if used
-    tmp_dir         = run_dict['tmp_dir']            # Location of temp hard disk location - if used
-    aux_dir         = run_dict['aux_dir']
-    parallel        = run_dict['parallel']
-###################################################################################
+    ###################################################################################
 
     # Model code below, do not modify
 
@@ -52,18 +54,17 @@ def SP_LG(track_no,
 
     # Now create a .smet file of reanalysis and return a track object
 
-    my_track = track_utils.create_smet_file(year=year,
-                                            track_no=track_no,
-                                            stop_date=hard_stop_date,
-                                            tmp_dir=tmp_dir,
-                                            aux_dir=aux_dir)
-
-
+    my_track = track_utils.create_met_file(year=year,
+                                           track_no=track_no,
+                                           stop_date=hard_stop_date,
+                                           tmp_dir=tmp_dir,
+                                           aux_dir=aux_dir,
+                                           model_name=model_name)
 
     if my_track.valid_data == False:
         # If false, it means you probably have a 'summer track'
         logging.info(f'No relevant data for track {track_no}')
-        duration = np.nan
+        my_track.duration = np.nan
 
     else:
 
@@ -71,54 +72,56 @@ def SP_LG(track_no,
 
             logging.debug(f'Track dates: {my_track.info["start_date"]} : {my_track.info["end_date"]}')
 
-            SP_utils.create_sno_file(start_date=my_track.info['start_date'],
-                                    start_loc = my_track.info['start_coords'],
-                                    track_no=track_no,
-                                    tmp_dir=tmp_dir,
-                                    aux_dir=aux_dir)
+            if model_name == 'snowpack':
 
+                SP_utils.create_sno_file(start_date=my_track.info['start_date'],
+                                         start_loc=my_track.info['start_coords'],
+                                         track_no=track_no,
+                                         tmp_dir=tmp_dir,
+                                         aux_dir=aux_dir)
 
-            SP_utils.create_ini_file(track_no=track_no,
-                                     tmp_dir=tmp_dir,
-                                     aux_dir=aux_dir)
+                SP_utils.create_ini_file(track_no=track_no,
+                                         tmp_dir=tmp_dir,
+                                         aux_dir=aux_dir)
 
             ###################################################################################
 
             # Run SNOWPACK
 
-            duration = SP_utils.run(my_track.info['end_date'],
-                         tmp_dir = tmp_dir,
-                         track_no = track_no)
+            my_track = SP_utils.run_model(model_name,
+                                          my_track,
+                                          tmp_dir=tmp_dir,
+                                          track_no=track_no)
 
-            snowpro_list = pro_utils.read(track_no, tmp_dir)                # Read the .pro file into a profile object
+            if model_name == 'snowpack':
 
-            # Prep media for SMRT to operate on if required
+                snowpro_list = pro_utils.read(track_no, tmp_dir)  # Read the .pro file into a profile object
 
-            ##########################################################################################
+                # Prep media for SMRT to operate on if required
 
-            if save_media_list or (not block_smrt):
+                ##########################################################################################
 
-                mediums_list = [smrt_utils.prep_medium(snowpro,my_track.info['ice_type']) for snowpro in snowpro_list]
+                if save_media_list or (not block_smrt):
 
-                if save_media_list:
+                    mediums_list = [smrt_utils.prep_medium(snowpro, my_track.info['ice_type']) for snowpro in snowpro_list]
 
-                    # Shelve the list of objects under the track_no
-                    shelf_dir = f"{output_dir}{media_f_name}_{year}"
+                    if save_media_list:
+                        # Shelve the list of objects under the track_no
+                        shelf_dir = f"{output_dir}{media_f_name}_{year}"
 
-                    with shelve.open(shelf_dir, 'c') as d:
-
-                        d[str(track_no)] = mediums_list
+                        with shelve.open(shelf_dir, 'c') as d:
+                            d[str(track_no)] = mediums_list
 
                 # Run SMRT on the list of media
 
-                if block_smrt == False:
+                if not block_smrt:
 
                     try:
 
-                        start_timer = time.time() #Baseline for timing the SMRT run
+                        start_timer = time.time()  # Baseline for timing the SMRT run
 
                         smrt_res = smrt_utils.run_media_series(mediums_list,
-                                                                [19e9, 37e9],
+                                                               [19e9, 37e9],
                                                                pol=['V', 'H'],
                                                                parallel=parallel)
                         end_timer = time.time()
@@ -127,17 +130,22 @@ def SP_LG(track_no,
 
                     except Exception as e:
                         print(e)
-                        smrt_res= None
+                        smrt_res = None
 
-                else: smrt_res = None
+                else:
+                    smrt_res = None
 
-            else: smrt_res = None
+            else:
+                smrt_res = None
 
             # Process results
+            if model_name == 'snowpack':
 
-            results = smrt_utils.process_results(snowpro_list, smrt_res, [19e9, 37e9])
+                results = smrt_utils.process_results(snowpro_list, smrt_res, [19e9, 37e9])
+                results['coords'] = my_track.frame['track_coords']
 
-            results['coords'] = my_track.frame['track_coords']
+            else:
+                results = my_track.output
 
             # Save the results
 
@@ -149,9 +157,9 @@ def SP_LG(track_no,
 
         except Exception as e:
             logging.exception(f'{track_no}')
-            duration = np.nan
+            my_track.duration = np.nan
 
-        if delete:
+        if delete and (model_name == 'snowpack'):
             deletion_list = [f'{track_no}_SPLG.haz',
                              f'{track_no}_SPLG.ini',
                              f'{track_no}_SPLG.sno',
@@ -159,11 +167,11 @@ def SP_LG(track_no,
                              f'config_{track_no}.ini',
                              f'track_{track_no}.smet']
 
-            with open(f'{output_dir}{log_f_name}','ab') as log:
+            with open(f'{output_dir}{log_f_name}', 'ab') as log:
                 for file in deletion_list:
                     cleaner_command = ['rm', f'{file}']
                     subprocess.call(cleaner_command,
                                     cwd=f'{tmp_dir}',
                                     stderr=log)
 
-    return(duration)
+    return my_track.duration

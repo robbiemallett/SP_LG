@@ -2,6 +2,7 @@ from pyproj import Proj, transform
 import matplotlib.pyplot as plt
 import h5py
 import pandas as pd
+import pickle
 import numpy as np
 import warnings
 warnings.filterwarnings("ignore")
@@ -10,11 +11,12 @@ sys.setrecursionlimit(10000)
 import ERA5_utils
 import classes
 
-def create_smet_file(year,
-                     track_no,
-                     stop_date,
-                     tmp_dir,
-                     aux_dir):
+def create_met_file(year,
+                    track_no,
+                    stop_date,
+                    tmp_dir,
+                    aux_dir,
+                    model_name):
 
     smet_file_name= f'{tmp_dir}/track_{track_no}.smet'
 
@@ -29,7 +31,7 @@ def create_smet_file(year,
 
         full = ERA5_utils.add_derived_vars_to_track(rean)
 
-        smet = ERA5_utils.create_smet_df(full)
+        my_track.met_forcing = full
 
         initial_coords = xy_to_lonlat(my_track.info['start_coords'][0],
                                       my_track.info['start_coords'][1])
@@ -38,7 +40,15 @@ def create_smet_file(year,
 
         metadata = (np.round(initial_coords, decimals=1), start_date)
 
-        ERA5_utils.save_smet_file(smet, metadata, smet_file_name, track_no)
+        if model_name == 'snowpack':
+
+            smet = ERA5_utils.create_smet_df(full)
+
+            ERA5_utils.save_smet_file(smet, metadata, smet_file_name, track_no)
+
+        elif (model_name == 'degree_days') or (model_name == 'nesosim'):
+
+            pass
 
     return(my_track)
 

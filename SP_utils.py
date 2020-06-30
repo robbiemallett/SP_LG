@@ -6,30 +6,72 @@ import xarray as xr
 import psutil
 from scipy import spatial
 import time
+from classes import nesosim_snowpack, degree_days_snowpack
 
-def run(end_date,
-        track_no,
-        tmp_dir):
+def run_model(model_name,
+             my_track,
+             track_no,
+             tmp_dir):
 
-    args = ['snowpack', '-c', f'{tmp_dir}/config_{track_no}.ini', '-e', f'{end_date}']
+    end_date = my_track.info['end_date']
 
     start_timer = time.time()
 
-    sp_output = subprocess.call(args,
-                                    cwd=f'{tmp_dir}',
-                                    stdout=subprocess.DEVNULL)
-                                    # stderr=log,
+    if model_name == 'snowpack':
 
+        args = ['snowpack', '-c', f'{tmp_dir}/config_{track_no}.ini', '-e', f'{end_date}']
+
+        subprocess.call(args,
+                        cwd=f'{tmp_dir}',
+                        stdout=subprocess.DEVNULL)
+                        # stderr=log,
+
+    elif (model_name == 'degree_days') or (model_name == 'nesosim'):
+
+        my_track.output = simple_model(my_track.met_forcing)
 
     end_timer = time.time()
 
-    duration = int(end_timer-start_timer)
+    my_track.duration = int(end_timer-start_timer)
 
-    return(duration)
+    return(my_track)
 
 
+def simple_model(df):
+    NE_snowpack = nesosim_snowpack()
+    DD_snowpack = degree_days_snowpack()
 
-def get_init_vals(start_date,start_loc,aux_dir):
+    NE_depths = []
+    NE_SWEs = []
+    DD_depths = []
+    DD_SWEs = []
+
+    for prec, temp, wind in zip(df['cum_prec'],
+                                df['t2m'],
+                                df['wind_speed']):
+
+        if temp < 273:
+            NE_snowpack.accumulate(prec)
+
+        if wind > 5:
+            NE_snowpack.wind_pack()
+
+        NE_depths.append(NE_snowpack.total('dep'))
+        NE_SWEs.append(NE_snowpack.total('SWE'))
+        DD_depths.append(DD_snowpack.total('dep'))
+        DD_SWEs.append(DD_snowpack.total('SWE'))
+
+    df['NE_depths'] = NE_depths
+    df['NE_SWEs'] = NE_SWEs
+    df['DD_depths'] = DD_depths
+    df['DD_SWEs'] = DD_SWEs
+
+    return (df)
+
+
+def get_init_vals(start_date,
+                  start_loc,
+                  aux_dir):
 
     if start_date.month == 8: # If ice parcel exists at start of simulation, then take W99 or
 
@@ -45,7 +87,6 @@ def get_init_vals(start_date,start_loc,aux_dir):
         EASE_tree = spatial.KDTree(xy_grid_points)
         distance, index = EASE_tree.query(start_loc)
         nearest_index = np.unravel_index(index, (361, 361))
-
         pio_thick_point, w99_thick_point = pio_thick_field[nearest_index], w99_thick_field[nearest_index]
 
         if (np.isnan(w99_thick_point)) or (w99_thick_point < 0.01):

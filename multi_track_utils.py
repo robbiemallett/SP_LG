@@ -48,6 +48,7 @@ def multi_track_run(tracks_to_run,
                     'achieved_runs' : achieved_runs}
 
     logging.critical(f'Run stats: {return_dict}')
+    print(f'Run stats: {return_dict}')
 
     return(return_dict)
 
