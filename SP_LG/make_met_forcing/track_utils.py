@@ -7,24 +7,25 @@ import sys
 sys.setrecursionlimit(10000)
 from make_met_forcing import ERA5_utils, track_class
 import psutil
+import time
 
-def create_met_forcing(year,
+def create_met_forcing(config,
                        track_no,
-                       stop_date,
-                       tmp_dir,
-                       aux_dir,
-                       model_name):
+                       stop_date):
 
-    track = get(year, track_no, aux_dir)
+    track = get(config.year, track_no, config.tracks_dir)
 
-    my_track = track_class.track(track, year, stop_date, aux_dir)
+    my_track = track_class.track(track,
+                                 config.year,
+                                 stop_date,
+                                 config.aux_data_dir)
 
     my_track.track_no = track_no
 
     if my_track.valid_data:
 
         rean = ERA5_utils.add_reanalysis_to_track(my_track,
-                                                  aux_dir=aux_dir)
+                                                  config)
 
         full = ERA5_utils.add_derived_vars_to_track(rean)
 
@@ -35,18 +36,20 @@ def create_met_forcing(year,
 
         start_date = my_track.info['start_date']
 
-        metadata = (np.round(initial_coords, decimals=1), start_date)
+        my_track.metadata = (np.round(initial_coords, decimals=1), start_date)
 
     return(my_track)
 
-def get(year, track_no, track_dir):
+def get(year,
+        track_no,
+        track_dir):
 
-    track_file_name = f'{track_dir}/{year}.h5'
+    track_file_name = f'{track_dir}tracks_{year}.h5'
 
-    f = h5py.File(track_file_name, 'r')
+    with h5py.File(track_file_name, 'r') as f:
 
-    track = list(f[str(track_no)])
-    f.close()
+        track = f[f't{track_no}'].value
+
 
     return (track)
 

@@ -28,19 +28,21 @@ def get_grid(aux_dir):
 
     return(ERA_grid_points)
 
-def get_daylist(year):
+# def get_daylist(year):
+#
+#     """Takes a year and provides a list of 365 datetime objects for every day
+#     after starting on 31/8/year"""
+#
+#     start_day = datetime.date(year=year, month=8, day=31)
+#
+#     datetime_list = [start_day + timedelta(days=int(day)) for day in range(365)]
+#
+#     return(datetime_list)
 
-    """Takes a year and provides a list of 365 datetime objects for every day
-    after starting on 31/8/year"""
 
-    start_day = datetime.date(year=year, month=8, day=31)
+def add_reanalysis_to_track(my_track,
+                            config):
 
-    datetime_list = [start_day + timedelta(days=int(day)) for day in range(365)]
-
-    return(datetime_list)
-
-
-def add_reanalysis_to_track(my_track,aux_dir):
     varlist = ['u10', 'v10', 't2m', 'ptype', 'asn', 'ssrd', 'strd', 'tp']
 
     list_of_dicts = []
@@ -72,8 +74,8 @@ def add_reanalysis_to_track(my_track,aux_dir):
 
         # Import data
 
-        with xr.open_dataset(f'{aux_dir}/ERA_{str(year)}_{str(month).zfill(2)}.nc') as data, \
-                xr.open_dataset(f'{aux_dir}/ERA_{year}_{str(month).zfill(2)}rh_.nc') as rh_data:
+        with xr.open_dataset(f'{config.aux_data_dir}/ERA_{str(year)}_{str(month).zfill(2)}.nc') as data, \
+                xr.open_dataset(f'{config.aux_data_dir}/ERA_{year}_{str(month).zfill(2)}rh_.nc') as rh_data:
 
             # data = Dataset(f'{era_dir}{str(year)}_{str(month).zfill(2)}.nc')
             # rh_data = Dataset(f'{rh_dir}{year}_{str(month).zfill(2)}rh_.nc')

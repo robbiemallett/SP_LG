@@ -49,6 +49,7 @@ config.frequencies = [19e9, 37e9]
 if config.hpc_run:
     config.tmp_dir = os.getcwd()
     config.aux_data_dir = '/home/ucfarm0/SP_LG/aux_data/'
+    config.tracks_dir = '/home/ucfarm0/SP_LG/tracks/'
     config.output_dir = '/home/ucfarm0/Scratch/'
     config.use_RAM = False
     config.parallel_SMRT=False
@@ -57,6 +58,7 @@ else:
     config.tmp_dir = '/home/robbie/Dropbox/SP_LG/Snowpack_files'
     config.aux_data_dir = '/home/robbie/Dropbox/Data/SP_LG_aux_data/'
     config.output_dir = "/home/robbie/Dropbox/SP_LG/SP_LG_Output/"
+    config.tracks_dir = "/home/robbie/Dropbox/SP_LG/tracks/"
 
 ######################################################################
 

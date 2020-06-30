@@ -140,6 +140,8 @@ for day_num in trange(0, 300):
 
     if (len(valid_points) > 70_000) or (date > end_date): break
 
+np.save(f'{output_dir}tracks_array_{year}.npy', tracks_array)
+
 for track_no in tqdm.trange(tracks_array.shape[2]):
 
     track = tracks_array[:, :, track_no]

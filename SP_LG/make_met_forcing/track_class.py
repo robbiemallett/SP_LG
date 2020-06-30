@@ -1,9 +1,10 @@
 import numpy as np
 from scipy import spatial
 import pandas as pd
-from make_met_forcing.ERA5_utils import get_grid, get_daylist
+from make_met_forcing.ERA5_utils import get_grid
 import logging
 import datetime
+import time
 
 
 class track:
@@ -13,7 +14,10 @@ class track:
 
         # Trim leading and trailing nans from the track (as parcel enters and leaves the scheme)
 
-        x_coords = [coord[0] for coord in input_track] # splits off x coordinates
+        x_coords, y_coords = list(input_track[0]), list(input_track[1])
+
+        input_track = list(zip(x_coords, y_coords))
+
         x_nans = np.isnan(x_coords) # Checks which values are nans and which aren't
         all_nans = all(x_nans) # Evaluates to True if all values are nans
 

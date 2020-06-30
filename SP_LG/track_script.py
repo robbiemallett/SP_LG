@@ -37,12 +37,9 @@ def SP_LG(track_no,
 
     # Now create a .smet file of reanalysis and return a track object
 
-    my_track = track_utils.create_met_forcing(year=year,
+    my_track = track_utils.create_met_forcing(config=config,
                                               track_no=track_no,
-                                              stop_date=hard_stop_date,
-                                              tmp_dir=tmp_dir,
-                                              aux_dir=config.aux_data_dir,
-                                              model_name=model_name)
+                                              stop_date=hard_stop_date)
 
     if my_track.valid_data == False:
         # If false, it means you probably have a 'summer track'
