@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SP_LG.track_making package &#8212; Lag_Snow 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="SP_LG.snow_models.snowpack package" href="SP_LG.snow_models.snowpack.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="sp-lg-track-making-package">
+<h1>SP_LG.track_making package<a class="headerlink" href="#sp-lg-track-making-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-SP_LG.track_making.funcs">
+<span id="sp-lg-track-making-funcs-module"></span><h2>SP_LG.track_making.funcs module<a class="headerlink" href="#module-SP_LG.track_making.funcs" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="SP_LG.track_making.funcs.get">
+<code class="sig-prename descclassname">SP_LG.track_making.funcs.</code><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">string</span></em>, <em class="sig-param"><span class="n">grid_dir</span></em><span class="sig-paren">)</span><a class="headerlink" href="#SP_LG.track_making.funcs.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>“Returns a 361x361 grid of lon lat values for the 25 km EASE grid.
+These are taken from a netcdf file which is included in this repo.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="SP_LG.track_making.funcs.get_day_vectors">
+<code class="sig-prename descclassname">SP_LG.track_making.funcs.</code><code class="sig-name descname">get_day_vectors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">date_obj</span></em><span class="sig-paren">)</span><a class="headerlink" href="#SP_LG.track_making.funcs.get_day_vectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a 2-part dictionary of u and v vectors for a given date, on 361x361 25 km EASE grid.
+CURRENTLY UNUSED</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="SP_LG.track_making.funcs.lonlat_to_xy">
+<code class="sig-prename descclassname">SP_LG.track_making.funcs.</code><code class="sig-name descname">lonlat_to_xy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">lat</span></em><span class="sig-paren">)</span><a class="headerlink" href="#SP_LG.track_making.funcs.lonlat_to_xy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts WGS 84 coords to EASE grid. Can take a single point or two lists</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="SP_LG.track_making.funcs.one_iteration">
+<code class="sig-prename descclassname">SP_LG.track_making.funcs.</code><code class="sig-name descname">one_iteration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">point</span></em>, <em class="sig-param"><span class="n">field</span></em>, <em class="sig-param"><span class="n">tree</span></em>, <em class="sig-param"><span class="n">timestep</span></em><span class="sig-paren">)</span><a class="headerlink" href="#SP_LG.track_making.funcs.one_iteration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterates a point based on its position in an ice motion field. Must be passed a pre-calculated KDTree
+of the field (which saves time). Timestep must be in seconds, field vectors must be in cm/s. If the point’s
+nearest velocity value is nan (representing open water), then it returns a nan point (np.nan, np.nan)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="SP_LG.track_making.funcs.select_and_save_track">
+<code class="sig-prename descclassname">SP_LG.track_making.funcs.</code><code class="sig-name descname">select_and_save_track</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">track</span></em>, <em class="sig-param"><span class="n">track_no</span></em>, <em class="sig-param"><span class="n">f_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#SP_LG.track_making.funcs.select_and_save_track" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="SP_LG.track_making.funcs.xy_to_lonlat">
+<code class="sig-prename descclassname">SP_LG.track_making.funcs.</code><code class="sig-name descname">xy_to_lonlat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#SP_LG.track_making.funcs.xy_to_lonlat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts EASE grid coordinates to WGS 84. Can take a single point or two lists</p>
+</dd></dl>
+
+</div>
+<div class="section" id="sp-lg-track-making-main-module">
+<h2>SP_LG.track_making.main module<a class="headerlink" href="#sp-lg-track-making-main-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-SP_LG.track_making.tracks_to_xy">
+<span id="sp-lg-track-making-tracks-to-xy-module"></span><h2>SP_LG.track_making.tracks_to_xy module<a class="headerlink" href="#module-SP_LG.track_making.tracks_to_xy" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="SP_LG.track_making.tracks_to_xy.process_raw_tracks">
+<code class="sig-prename descclassname">SP_LG.track_making.tracks_to_xy.</code><code class="sig-name descname">process_raw_tracks</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">year</span></em><span class="sig-paren">)</span><a class="headerlink" href="#SP_LG.track_making.tracks_to_xy.process_raw_tracks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="SP_LG.track_making.tracks_to_xy.upsample_week_to_day">
+<code class="sig-prename descclassname">SP_LG.track_making.tracks_to_xy.</code><code class="sig-name descname">upsample_week_to_day</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">EASE_x_weekly</span></em><span class="sig-paren">)</span><a class="headerlink" href="#SP_LG.track_making.tracks_to_xy.upsample_week_to_day" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="SP_LG.track_making.tracks_to_xy.xy_to_lonlat">
+<code class="sig-prename descclassname">SP_LG.track_making.tracks_to_xy.</code><code class="sig-name descname">xy_to_lonlat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#SP_LG.track_making.tracks_to_xy.xy_to_lonlat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="sp-lg-track-making-weekly-module">
+<h2>SP_LG.track_making.weekly module<a class="headerlink" href="#sp-lg-track-making-weekly-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-SP_LG.track_making">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-SP_LG.track_making" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Lag_Snow</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Title</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">SP_LG</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="SP_LG.html">SP_LG package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="SP_LG.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="SP_LG.make_met_forcing.html">SP_LG.make_met_forcing package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SP_LG.microwave_models.html">SP_LG.microwave_models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SP_LG.misc.html">SP_LG.misc package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SP_LG.snow_models.html">SP_LG.snow_models package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">SP_LG.track_making package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="SP_LG.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="SP_LG.html#module-SP_LG.gui">SP_LG.gui module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="SP_LG.html#sp-lg-master-script-module">SP_LG.master_script module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="SP_LG.html#sp-lg-track-script-module">SP_LG.track_script module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="SP_LG.html#module-SP_LG">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">SP_LG</a><ul>
+  <li><a href="SP_LG.html">SP_LG package</a><ul>
+      <li>Previous: <a href="SP_LG.snow_models.snowpack.html" title="previous chapter">SP_LG.snow_models.snowpack package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Robbie Mallett.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/SP_LG.track_making.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

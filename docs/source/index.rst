@@ -1,21 +1,19 @@
-Simple Documentation
+.. Lag_Snow documentation master file, created by
+   sphinx-quickstart on Thu Jul  2 20:37:01 2020.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to Lag_Snow's documentation!
 ====================================
-Another simple header
-===================================
 
-Here is some text explaining some very complicated stuff
-
-    print 'hello'
-    >> hello
-
-Guide
-^^^^^
+Robs test
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
+   :caption: Contents:
 
-   licence
-   help
+   intro
+   modules
 
 
 
