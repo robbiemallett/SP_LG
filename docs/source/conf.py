@@ -20,6 +20,7 @@
 project = 'Snow_Lag'
 copyright = '2020, Robbie Mallett'
 author = 'Robbie Mallett'
+master_doc = 'index'
 
 # The full version, including alpha/beta/rc tags
 release = '0.0.1'
