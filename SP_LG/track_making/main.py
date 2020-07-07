@@ -3,7 +3,8 @@ import datetime
 from scipy.spatial import KDTree
 import numpy as np
 import sys
-sys.path.append('..')
+sys.path.append('/home/ucfarm0/SP_LG/SP_LG/SP_LG')
+# sys.path.append('..')
 from misc.calibration_tools.identify_relevant_tracks import lonlat_to_xy
 from track_making.funcs import one_iteration, select_and_save_track
 import tqdm
@@ -33,17 +34,20 @@ def make_daily_tracks():
         year = int(sys.argv[1])
         hemisphere = sys.argv[2]
 
-        if (type(hemisphere) != str) or (hemisphere not in ['n', 's']):
+        if (type(hemisphere) != str) or (hemisphere not in ['n','s']):
             raise
+
 
 
     if '-hpc' in sys.argv:
 
-        machine_config = pickle.load(open('../config/hpc.cfg', 'rb'))
+        config_directory = '/home/ucfarm0/SP_LG/SP_LG/SP_LG/config'
+
+        machine_config = pickle.load(open(f'{config_directory}/hpc.cfg', 'rb'))
 
         data_dir = output_dir = machine_config.tracks_dir
     else:
-        machine_config = pickle.load(open('../config/desktop.cfg', 'rb'))
+        machine_config = pickle.load(open(f'../config/desktop.cfg', 'rb'))
         output_dir = machine_config.tracks_dir
         data_dir = '/home/robbie/Dropbox/Data/IMV/'
 
