@@ -2,11 +2,8 @@ import pandas as pd
 import numpy as np
 from pyproj import Proj, transform
 from scipy import spatial
-import matplotlib.pyplot as plt
 import tqdm
 import datetime
-import cartopy.crs as ccrs
-import cartopy
 
 def OIB_get(day, month, year):
 
@@ -67,6 +64,9 @@ def lonlat_to_xy(lon, lat, hemisphere, inverse=False):
 
 
 def plot(df):
+    import matplotlib.pyplot as plt
+    import cartopy.crs as ccrs
+    import cartopy
 
     """ Plots an OIB track.
     Args:
