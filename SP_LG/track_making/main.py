@@ -1,155 +1,189 @@
 from netCDF4 import Dataset
 import datetime
-from track_making.funcs import lonlat_to_xy, get, one_iteration, select_and_save_track
 from scipy.spatial import KDTree
 import numpy as np
 import sys
+sys.path.append('..')
+from misc.calibration_tools.identify_relevant_tracks import lonlat_to_xy
+from track_making.funcs import one_iteration, select_and_save_track
 import tqdm
+import pickle
+import os
 from tqdm import trange
 
-now = datetime.datetime.now()
-current_time = now.strftime("%H:%M:%S")
-print("Start Time =", current_time)
 
-# What year?
-if len(sys.argv) == 1:
-    year = 2016
-else:
-    year = int(sys.argv[1])
+def make_daily_tracks():
+    """ Makes tracks from daily ice motion vectors
 
-if '-hpc' in sys.argv:
-    data_dir = '/home/ucfarm0/tracks'
-    grid_dir = '/home/ucfarm0/tracks/track_making/'
-    output_dir = '/home/ucfarm0/Scratch/'
-else:
-    data_dir = '/home/robbie/Dropbox/Data/IMV'
-    output_dir = ''
-    grid_dir = ''
+    Script is run from the command line: e.g. python3 main.py 2016 n (for northern hemisphere winter 2016/17). If the
+    script isn't run from the command line (for testing, playing), it's automatically configured for 2016 n.
 
-# What day do you want to start?
+    Returns:
+        Nothing (saves file).
+    """
 
-start_day = datetime.date(year=year,month=8,day=31)
-start_day_of_year = start_day.timetuple().tm_yday
+    now = datetime.datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    print("Start Time =", current_time)
 
-# Get dataset
+    # What year?
+    if len(sys.argv) == 1:
+        year = 2016
+        hemisphere = 'n'
+    else:
+        year = int(sys.argv[1])
+        hemisphere = sys.argv[2]
 
-data_16 = Dataset(f'{data_dir}/icemotion_daily_nh_25km_{year}0101_{year}1231_v4.1.nc')
-data_17 = Dataset(f'{data_dir}/icemotion_daily_nh_25km_{year+1}0101_{year+1}1231_v4.1.nc')
+        if (type(hemisphere) != str) or (hemisphere not in ['n', 's']):
+            raise
 
-# Get EASE_lons & EASE_lats
 
-EASE_lons = get('lon',grid_dir)
-EASE_lats = get('lat',grid_dir)
+    if '-hpc' in sys.argv:
 
-EASE_xs, EASE_ys = lonlat_to_xy(EASE_lons.ravel(), EASE_lats.ravel())
+        machine_config = pickle.load(open('../config/hpc.cfg', 'rb'))
 
-EASE_tree = KDTree(list(zip(EASE_xs, EASE_ys)))
+        data_dir = output_dir = machine_config.tracks_dir
+        grid_dir = os.getcwd()
+    else:
+        machine_config = pickle.load(open('../config/desktop.cfg', 'rb'))
+        output_dir = machine_config.tracks_dir
+        data_dir = '/home/robbie/Dropbox/Data/IMV/'
+        grid_dir = ''
 
-EASE_xs_grid = EASE_xs.reshape((361,361))
-EASE_ys_grid = EASE_ys.reshape((361,361))
+    if hemisphere == 'n':
+        dims = (361, 361)
+        start_day = datetime.date(year=year, month=8, day=31)
+        end_date = datetime.date(year=year + 1, month=4, day=30)
+    elif hemisphere == 's':
+        dims = (321, 321)
+        start_day = datetime.date(year=year, month=2, day=1)
+        end_date = datetime.date(year=year, month=10, day=1)
+    else:
+        raise
 
-start_x, start_y = EASE_xs.ravel(), EASE_ys.ravel()
+    start_day_of_year = start_day.timetuple().tm_yday
 
-all_u16, all_v16 = np.array(data_16['u']), np.array(data_16['v'])
-all_u17, all_v17 = np.array(data_17['u']), np.array(data_17['v'])
+    # Get dataset
 
-all_u = np.ma.concatenate((all_u16, all_u17), axis=0)
-all_v = np.ma.concatenate((all_v16, all_v17), axis=0)
+    data_16 = Dataset(f'{data_dir}icemotion_daily_{hemisphere}h_25km_{year}0101_{year}1231_v4.1.nc')
+    data_17 = Dataset(f'{data_dir}icemotion_daily_{hemisphere}h_25km_{year + 1}0101_{year + 1}1231_v4.1.nc')
 
-all_u = np.ma.masked_where(all_u==-9999.0, all_u)
-all_u = np.ma.filled(all_u, np.nan)
-all_v = np.ma.masked_where(all_v==-9999.0, all_v)
-all_v = np.ma.filled(all_v, np.nan)
+    # Get EASE_lons & EASE_lats
 
-#######################################################
+    EASE_lons = np.array(data_16['longitude'])
+    EASE_lats = np.array(data_16['latitude'])
 
-tracks_array = np.full((2,250,70_000), np.nan)
+    EASE_xs, EASE_ys = lonlat_to_xy(EASE_lons.ravel(), EASE_lats.ravel(), hemisphere=hemisphere)
 
-end_date = datetime.date(year=year+1,month=4,day=30)
+    EASE_tree = KDTree(list(zip(EASE_xs, EASE_ys)))
 
-data_for_start_day = {'u':all_u[start_day_of_year-1],
-                      'v':all_v[start_day_of_year-1]}
+    # EASE_xs_grid = EASE_xs.reshape(dims)
+    # EASE_ys_grid = EASE_ys.reshape(dims)
 
-u_field = data_for_start_day['u'].ravel()
+    start_x, start_y = EASE_xs.ravel(), EASE_ys.ravel()
 
-# Select points on ease grid with valid velocity data on day 0
+    all_u16, all_v16 = np.array(data_16['u']), np.array(data_16['v'])
+    all_u17, all_v17 = np.array(data_17['u']), np.array(data_17['v'])
 
-valid_start_x = start_x[~np.isnan(u_field)]
-valid_start_y = start_y[~np.isnan(u_field)]
+    all_u = np.ma.concatenate((all_u16, all_u17), axis=0)
+    all_v = np.ma.concatenate((all_v16, all_v17), axis=0)
 
-valid_points = list(zip(valid_start_x, valid_start_y))
+    all_u = np.ma.masked_where(all_u == -9999.0, all_u)
+    all_u = np.ma.filled(all_u, np.nan)
+    all_v = np.ma.masked_where(all_v == -9999.0, all_v)
+    all_v = np.ma.filled(all_v, np.nan)
 
-for day_num in trange(0, 300):
+    #######################################################
 
-    valid_points_x = list(zip(*valid_points))[0]
-    valid_points_y = list(zip(*valid_points))[1]
+    tracks_array = np.full((2, 250, 70_000), np.nan)
 
-    tracks_array[0, day_num, :len(valid_points_x)] = valid_points_x
-    tracks_array[1, day_num, :len(valid_points_y)] = valid_points_y
 
-    date = start_day + datetime.timedelta(days=day_num)
+    data_for_start_day = {'u': all_u[start_day_of_year - 1],
+                          'v': all_v[start_day_of_year - 1]}
 
-    day_of_year = date.timetuple().tm_yday
+    u_field = data_for_start_day['u'].ravel()
 
-    print(f'Day_num: {day_num}, Total tracks: {len(valid_points)}')
+    # Select points on ease grid with valid velocity data on day 0
 
-    # Get the ice motion field for that day
+    valid_start_x = start_x[~np.isnan(u_field)]
+    valid_start_y = start_y[~np.isnan(u_field)]
 
-    data_for_day = {'u': all_u[start_day_of_year + day_num - 1],
-                    'v': all_v[start_day_of_year + day_num - 1]}
+    valid_points = list(zip(valid_start_x, valid_start_y))
 
-    # Update points
+    for day_num in trange(0, 300):
 
-    updated_points = [one_iteration(point,
-                                    data_for_day,
-                                    EASE_tree,
-                                    24 * 60 * 60) if point != (np.nan, np.nan) else point for point in valid_points]
+        valid_points_x = list(zip(*valid_points))[0]
+        valid_points_y = list(zip(*valid_points))[1]
 
-    # Make list of points that are still alive
+        tracks_array[0, day_num, :len(valid_points_x)] = valid_points_x
+        tracks_array[1, day_num, :len(valid_points_y)] = valid_points_y
 
-    clean_points = [point for point in updated_points if point != (np.nan, np.nan)]
+        date = start_day + datetime.timedelta(days=day_num)
 
-    print(f'Tracks killed: {len(updated_points) - len(clean_points)}')
+        day_of_year = date.timetuple().tm_yday
 
-    # Create new parcels in gaps
-    # Make a decision tree for the track field
+        print(f'Day_num: {day_num}, Total tracks: {len(valid_points)}')
 
-    track_tree = KDTree(clean_points)
+        # Get the ice motion field for that day
 
-    # Identify all points of ease_grid with valid values
+        data_for_day = {'u': all_u[start_day_of_year + day_num - 1],
+                        'v': all_v[start_day_of_year + day_num - 1]}
 
-    u_field = np.ma.masked_values(data_for_day['u'].ravel(), np.nan)
+        # Update points
 
-    valid_x, valid_y = start_x[~np.isnan(u_field)], start_y[~np.isnan(u_field)]
+        updated_points = [one_iteration(point,
+                                        data_for_day,
+                                        EASE_tree,
+                                        24 * 60 * 60) if point != (np.nan, np.nan) else point for point in valid_points]
 
-    # Iterate through all valid points to identify gaps using the tree
+        # Make list of points that are still alive
 
-    new_points = []
+        clean_points = [point for point in updated_points if point != (np.nan, np.nan)]
 
-    for point in zip(valid_x, valid_y):
-        distance, index = track_tree.query(point)
+        print(f'Tracks killed: {len(updated_points) - len(clean_points)}')
 
-        if distance > 20_000:  # Initiate new track
-            new_points.append(point)
+        # Create new parcels in gaps
+        # Make a decision tree for the track field
 
-    print(f'Tracks added: {len(new_points)}')
+        track_tree = KDTree(clean_points)
 
-    # Add newly intitiated tracks to other tracks
+        # Identify all points of ease_grid with valid values
 
-    valid_points = updated_points + new_points
+        u_field = np.ma.masked_values(data_for_day['u'].ravel(), np.nan)
 
-    if (len(valid_points) > 70_000) or (date > end_date): break
+        valid_x, valid_y = start_x[~np.isnan(u_field)], start_y[~np.isnan(u_field)]
 
-np.save(f'{output_dir}tracks_array_{year}.npy', tracks_array)
+        # Iterate through all valid points to identify gaps using the tree
 
-for track_no in tqdm.trange(tracks_array.shape[2]):
+        new_points = []
 
-    track = tracks_array[:, :, track_no]
+        for point in zip(valid_x, valid_y):
+            distance, index = track_tree.query(point)
 
-    select_and_save_track(track,
-                          track_no,
-                          f'{output_dir}tracks_{year}.h5')
+            if distance > 20_000:  # Initiate new track
+                new_points.append(point)
 
-now = datetime.datetime.now()
-current_time = now.strftime("%H:%M:%S")
-print("End Time =", current_time)
+        print(f'Tracks added: {len(new_points)}')
+
+        # Add newly intitiated tracks to other tracks
+
+        valid_points = updated_points + new_points
+
+        if (len(valid_points) > 70_000) or (date > end_date): break
+
+    np.save(f'{output_dir}tracks_array_{hemisphere}h_{year}.npy', tracks_array)
+
+    for track_no in tqdm.trange(tracks_array.shape[2]):
+        track = tracks_array[:, :, track_no]
+
+        select_and_save_track(track,
+                              track_no,
+                              f'{output_dir}tracks_{hemisphere}h_{year}.h5')
+
+    now = datetime.datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    print("End Time =", current_time)
+
+
+if __name__ == '__main__':
+    make_daily_tracks()
