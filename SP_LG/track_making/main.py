@@ -8,7 +8,6 @@ from misc.calibration_tools.identify_relevant_tracks import lonlat_to_xy
 from track_making.funcs import one_iteration, select_and_save_track
 import tqdm
 import pickle
-import os
 from tqdm import trange
 
 
@@ -43,19 +42,17 @@ def make_daily_tracks():
         machine_config = pickle.load(open('../config/hpc.cfg', 'rb'))
 
         data_dir = output_dir = machine_config.tracks_dir
-        grid_dir = os.getcwd()
     else:
         machine_config = pickle.load(open('../config/desktop.cfg', 'rb'))
         output_dir = machine_config.tracks_dir
         data_dir = '/home/robbie/Dropbox/Data/IMV/'
-        grid_dir = ''
 
     if hemisphere == 'n':
-        dims = (361, 361)
+        max_track_no = 70_000
         start_day = datetime.date(year=year, month=8, day=31)
         end_date = datetime.date(year=year + 1, month=4, day=30)
     elif hemisphere == 's':
-        dims = (321, 321)
+        max_track_no = 110_000
         start_day = datetime.date(year=year, month=2, day=1)
         end_date = datetime.date(year=year, month=10, day=1)
     else:
@@ -77,9 +74,6 @@ def make_daily_tracks():
 
     EASE_tree = KDTree(list(zip(EASE_xs, EASE_ys)))
 
-    # EASE_xs_grid = EASE_xs.reshape(dims)
-    # EASE_ys_grid = EASE_ys.reshape(dims)
-
     start_x, start_y = EASE_xs.ravel(), EASE_ys.ravel()
 
     all_u16, all_v16 = np.array(data_16['u']), np.array(data_16['v'])
@@ -95,7 +89,7 @@ def make_daily_tracks():
 
     #######################################################
 
-    tracks_array = np.full((2, 250, 70_000), np.nan)
+    tracks_array = np.full((2, 250, max_track_no), np.nan)
 
 
     data_for_start_day = {'u': all_u[start_day_of_year - 1],
@@ -169,7 +163,7 @@ def make_daily_tracks():
 
         valid_points = updated_points + new_points
 
-        if (len(valid_points) > 70_000) or (date > end_date): break
+        if (len(valid_points) > max_track_no) or (date > end_date): break
 
     np.save(f'{output_dir}tracks_array_{hemisphere}h_{year}.npy', tracks_array)
 
