@@ -4,7 +4,7 @@ from scipy.spatial import KDTree
 import numpy as np
 import sys
 sys.path.append('/home/ucfarm0/SP_LG/SP_LG/SP_LG')
-# sys.path.append('..')
+sys.path.append('..')
 from misc.calibration_tools.identify_relevant_tracks import lonlat_to_xy
 from track_making.funcs import one_iteration, select_and_save_track
 import tqdm
@@ -118,7 +118,7 @@ def make_daily_tracks():
 
         date = start_day + datetime.timedelta(days=day_num)
 
-        day_of_year = date.timetuple().tm_yday
+        # day_of_year = date.timetuple().tm_yday
 
         print(f'Day_num: {day_num}, Total tracks: {len(valid_points)}')
 
@@ -143,7 +143,9 @@ def make_daily_tracks():
         # Create new parcels in gaps
         # Make a decision tree for the track field
 
-        track_tree = KDTree(clean_points)
+        if clean_points:
+
+            track_tree = KDTree(clean_points)
 
         # Identify all points of ease_grid with valid values
 
@@ -156,10 +158,15 @@ def make_daily_tracks():
         new_points = []
 
         for point in zip(valid_x, valid_y):
-            distance, index = track_tree.query(point)
 
-            if distance > 20_000:  # Initiate new track
+            if clean_points == False:
                 new_points.append(point)
+            else:
+
+                distance, index = track_tree.query(point)
+
+                if (distance > 20_000):  # Initiate new track
+                    new_points.append(point)
 
         print(f'Tracks added: {len(new_points)}')
 
